@@ -1,5 +1,6 @@
 package co.com.crediya.api;
 
+import co.com.crediya.api.config.UserPath;
 import co.com.crediya.api.dto.request.CreateUserRequestDTO;
 import co.com.crediya.api.dto.response.UserResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -7,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.RouterOperation;
 import org.springdoc.core.annotations.RouterOperations;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +22,13 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
+@RequiredArgsConstructor
 public class RouterRest {
+
+    private final UserPath userPath;
+    private final Handler userHandler;
+
+
     @Bean
     @RouterOperations({
             @RouterOperation(
@@ -44,6 +52,6 @@ public class RouterRest {
             )
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
-        return route(POST("/api/v1/usuarios"), handler::listenSaveUser);
+        return route(POST(userPath.getSaveUser()), userHandler::listenSaveUser);
     }
 }

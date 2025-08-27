@@ -30,3 +30,7 @@ management:
         enabled: true
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
+
+routes:
+  paths:
+    saveUser: "/api/v1/usuarios"
