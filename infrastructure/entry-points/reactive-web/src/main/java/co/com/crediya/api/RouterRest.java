@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -26,8 +27,6 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 public class RouterRest {
 
     private final UserPath userPath;
-    private final Handler userHandler;
-
 
     @Bean
     @RouterOperations({
@@ -49,9 +48,26 @@ public class RouterRest {
                                     content = @Content(schema = @Schema(implementation = UserResponseDTO.class))
                             )
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/v1/usuarios",
+                    produces = MediaType.APPLICATION_JSON_VALUE,
+                    method = RequestMethod.GET,
+                    beanClass = Handler.class,
+                    beanMethod = "listenGetAllUsers",
+                    operation = @Operation(
+                            summary = "Get All Users",
+                            operationId = "listenGetAllUsers",
+                            responses = @ApiResponse(
+                                    responseCode = "200",
+                                    description = "Successful operation",
+                                    content = @Content(schema = @Schema(implementation = UserResponseDTO.class))
+                            )
+                    )
             )
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
-        return route(POST(userPath.getSaveUser()), userHandler::listenSaveUser);
+        return route(POST(userPath.getSaveUser()), handler::listenSaveUser)
+                .andRoute(GET(userPath.getGetAllUsers()), handler::listenGetAllUsers);
     }
 }
