@@ -4,6 +4,7 @@ import co.com.crediya.model.exceptions.BusinessException;
 import co.com.crediya.model.rol.gateways.RolRepository;
 import co.com.crediya.model.user.User;
 import co.com.crediya.model.user.gateways.UserRepository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class UserUseCase {
@@ -46,6 +47,17 @@ public class UserUseCase {
         return rolRepository.findById(roleId)
                 .switchIfEmpty(Mono.error(new BusinessException("Role ID does not exist: " + roleId)))
                 .then();
+    }
+
+    public Flux<User> getAllUsers() {
+        return userRepository.findAll()
+                .flatMap(user ->
+                        rolRepository.findById(user.getRole().getId())
+                                .map(role -> {
+                                    user.setRole(role);
+                                    return user;
+                                })
+                );
     }
 
 

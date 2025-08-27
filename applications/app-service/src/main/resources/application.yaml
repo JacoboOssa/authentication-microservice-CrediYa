@@ -34,3 +34,4 @@ cors:
 routes:
   paths:
     saveUser: "/api/v1/usuarios"
+    get-all-users: "/api/v1/usuarios"
