@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {RouterRest.class, Handler.class})
 @EnableConfigurationProperties(UserPath.class)
-@TestPropertySource(properties = {"routes.paths.save-user=/api/v1/usuarios", "routes.paths.get-all-users=/api/v1/usuarios"})
+@TestPropertySource(properties = {"routes.paths.save-user=/api/v1/usuarios", "routes.paths.get-all-users=/api/v1/usuarios", "routes.paths.get-user-email-by-id-number=/api/v1/usuarios/{identificationNumber}"})
 @WebFluxTest
 @Import({GlobalExceptionHandler.class, GlobalErrorAttributes.class})
 class RouterRestTest {

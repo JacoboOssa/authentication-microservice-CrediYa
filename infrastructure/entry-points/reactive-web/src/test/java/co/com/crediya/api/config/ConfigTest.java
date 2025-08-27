@@ -23,7 +23,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import static org.mockito.Mockito.when;
 
-@TestPropertySource(properties = {"routes.paths.get-all-users=/api/v1/usuarios", "routes.paths.save-user=/api/v1/usuarios"})
+@TestPropertySource(properties = {"routes.paths.save-user=/api/v1/usuarios", "routes.paths.get-all-users=/api/v1/usuarios", "routes.paths.get-user-email-by-id-number=/api/v1/usuarios/{identificationNumber}"})
 @EnableConfigurationProperties(UserPath.class)
 @ContextConfiguration(classes = {RouterRest.class, Handler.class})
 @WebFluxTest
