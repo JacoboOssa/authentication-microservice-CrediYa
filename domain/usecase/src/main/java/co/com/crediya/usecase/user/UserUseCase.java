@@ -16,27 +16,35 @@ public class UserUseCase {
     }
 
     public Mono<User> createUser(User user) {
-        return userRepository.existByEmail(user.getEmail())
-                .flatMap(emailExists -> {
-                    if (emailExists) {
-                        return Mono.error(new BusinessException("This email is already in use: " + user.getEmail()));
-                    }
-                    return userRepository.existByIdentificationNumber(user.getIdentificationNumber())
-                            .flatMap(idExists -> {
-                                if (idExists) {
-                                    return Mono.error(new BusinessException("This identification number is already in use: " + user.getIdentificationNumber()));
-                                }
-                                return userRepository.save(user)
-                                        .flatMap(savedUser ->
-                                                rolRepository.findById(savedUser.getRole().getId())
-                                                        .map(role -> {
-                                                            savedUser.setRole(role);
-                                                            return savedUser;
-                                                        })
-                                        );
-                            });
-                });
+        return validateIfEmailExists(user.getEmail())
+                .then(validateIfIdentificationNumberExists(user.getIdentificationNumber()))
+                .then(validateIfRoleIdExists(user.getRole().getId()))
+                .then(userRepository.save(user));
     }
+
+
+    public Mono<Void> validateIfEmailExists(String email) {
+        return userRepository.existByEmail(email)
+                .filter(emailExists -> !emailExists)
+                .switchIfEmpty(Mono.error(new BusinessException("This email is already in use: " + email)))
+                .then();
+    }
+
+    public Mono<Void> validateIfIdentificationNumberExists(String identificationNumber) {
+        return userRepository.existByIdentificationNumber(identificationNumber)
+                .filter(idExists -> !idExists)
+                .switchIfEmpty(Mono.error(new BusinessException("This identification number is already in use: " + identificationNumber)))
+                .then();
+    }
+
+    public Mono<Void> validateIfRoleIdExists(String roleId) {
+        return rolRepository.findById(roleId)
+                .switchIfEmpty(Mono.error(new BusinessException("Role ID does not exist: " + roleId)))
+                .then();
+    }
+
+
+
 
 
 
