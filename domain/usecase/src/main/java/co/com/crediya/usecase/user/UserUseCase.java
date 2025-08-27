@@ -19,7 +19,12 @@ public class UserUseCase {
         return validateIfEmailExists(user.getEmail())
                 .then(validateIfIdentificationNumberExists(user.getIdentificationNumber()))
                 .then(validateIfRoleIdExists(user.getRole().getId()))
-                .then(userRepository.save(user));
+                .then(rolRepository.findById(user.getRole().getId()))
+                .map(role -> {
+                    user.setRole(role);
+                    return user;
+                })
+                .flatMap(userRepository::save);
     }
 
 
