@@ -9,4 +9,5 @@ public interface UserRepository {
     Mono<Boolean> existByEmail(String email);
     Mono<Boolean> existByIdentificationNumber(String identificationNumber);
     Flux<User> findAll();
+    Mono<String> getEmailByIdentificationNumber(String identificationNumber);
 }

@@ -12,4 +12,5 @@ import org.springframework.context.annotation.Configuration;
 public class UserPath {
     private String saveUser;
     private String getAllUsers;
+    private String getUserEmailByIdNumber;
 }

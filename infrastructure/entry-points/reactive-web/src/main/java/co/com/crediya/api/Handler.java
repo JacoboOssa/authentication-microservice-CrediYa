@@ -14,6 +14,8 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -49,5 +51,18 @@ public class Handler {
                 .doOnSuccess(users -> log.info("Successfully retrieved all users"))
                 .doOnError(error -> log.error("Error retrieving users: {}", error.getMessage()));
     }
+
+    public Mono<ServerResponse> listenGetEmailByIdentificationNumber(ServerRequest serverRequest) {
+        String identificationNumber = serverRequest.pathVariable("identificationNumber");
+        log.info("Received request to get email by identification number: {}", identificationNumber);
+
+        return userUseCase.getEmailByIdentificationNumber(identificationNumber)
+                .flatMap(email -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(Map.of("email", email)))
+                .doOnSuccess(response -> log.info("Successfully retrieved email for identification number: {}", identificationNumber))
+                .doOnError(error -> log.error("Error retrieving email for identification number {}: {}", identificationNumber, error.getMessage()));
+    }
+
 
 }

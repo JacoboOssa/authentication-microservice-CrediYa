@@ -60,6 +60,16 @@ public class UserUseCase {
                 );
     }
 
+    public Mono<String> getEmailByIdentificationNumber(String identificationNumber) {
+        return userRepository.getEmailByIdentificationNumber(identificationNumber)
+                .switchIfEmpty(Mono.error(new BusinessException(
+                        "User not found for identification number: " + identificationNumber
+                )));
+    }
+
+
+
+
 
 
 
