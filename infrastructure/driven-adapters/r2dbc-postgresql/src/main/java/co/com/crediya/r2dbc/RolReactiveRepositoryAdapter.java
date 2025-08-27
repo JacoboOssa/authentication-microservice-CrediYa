@@ -8,7 +8,6 @@ import co.com.crediya.r2dbc.helper.ReactiveAdapterOperations;
 import co.com.crediya.r2dbc.helper.RolEntityMapper;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Mono;
 
 @Repository
 public class RolReactiveRepositoryAdapter extends ReactiveAdapterOperations<
@@ -28,8 +27,4 @@ public class RolReactiveRepositoryAdapter extends ReactiveAdapterOperations<
         return rolEntityMapper.toEntity(rol);
     }
 
-    @Override
-    public Mono<Rol> findById(String id) {
-        return super.findById(id);
-    }
 }

@@ -17,7 +17,6 @@ public class UserValidator {
         this.validator = validator;
     }
 
-  // Valida un objeto reactivamente (sin grupos). */
     public <T> Mono<T> validate(T object) {
         return Mono.defer(() -> {
             Set<ConstraintViolation<T>> violations = validator.validate(object);
@@ -27,7 +26,6 @@ public class UserValidator {
         });
     }
 
-  // Valida con grupos. /
     public <T> Mono<T> validate(T object, Class<?>... groups) {
         return Mono.defer(() -> {
             Set<ConstraintViolation<T>> violations = validator.validate(object, groups);

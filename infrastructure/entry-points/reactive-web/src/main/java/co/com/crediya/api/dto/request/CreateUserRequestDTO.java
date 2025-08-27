@@ -3,6 +3,7 @@ package co.com.crediya.api.dto.request;
 
 import jakarta.validation.constraints.*;
 import lombok.Builder;
+import org.hibernate.validator.constraints.UUID;
 
 
 @Builder
@@ -22,10 +23,11 @@ public record CreateUserRequestDTO(
         @Email(message = "Email should be valid")
         @NotBlank(message = "Email is required")
         String email,
-        @NotEmpty(message = "Base salary is required")
+        @NotNull(message = "Base salary is required")
         @Min(value = 0, message = "Base salary must be positive")
         @Max(value = 15000000, message = "Base salary must be less than or equal to 15,000,000")
         Double baseSalary,
+        @UUID(message = "Role ID must be a valid UUID")
         @NotBlank(message = "Role ID is required")
         String roleId
 ) {}

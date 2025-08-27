@@ -1,9 +1,8 @@
-package co.com.crediya.api.exceptionHandler;
+package co.com.crediya.api.exceptionhandler;
 
 import java.util.Map;
 
 import org.springframework.boot.autoconfigure.web.WebProperties;
-import org.springframework.boot.autoconfigure.web.WebProperties.Resources;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
