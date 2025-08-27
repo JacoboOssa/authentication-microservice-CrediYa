@@ -25,13 +25,4 @@ public class UserValidator {
             return Mono.just(object);
         });
     }
-
-    public <T> Mono<T> validate(T object, Class<?>... groups) {
-        return Mono.defer(() -> {
-            Set<ConstraintViolation<T>> violations = validator.validate(object, groups);
-            if (!violations.isEmpty())
-                return Mono.error(new ConstraintViolationException(violations));
-            return Mono.just(object);
-        });
-    }
  }
