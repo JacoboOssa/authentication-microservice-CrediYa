@@ -1,13 +1,14 @@
 package co.com.crediya.r2dbc;
 
+import co.com.crediya.model.rol.Rol;
+import co.com.crediya.model.user.User;
+import co.com.crediya.r2dbc.entity.UserEntity;
+import co.com.crediya.r2dbc.helper.UserEntityMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.reactivecommons.utils.ObjectMapper;
-import org.springframework.data.domain.Example;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -15,8 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MyReactiveRepositoryAdapterTest {
-    // TODO: change four you own tests
+class UserReactiveRepositoryAdapterTest {
 
     @InjectMocks
     UserReactiveRepositoryAdapter repositoryAdapter;
@@ -25,54 +25,124 @@ class MyReactiveRepositoryAdapterTest {
     UserReactiveRepository repository;
 
     @Mock
-    ObjectMapper mapper;
+    UserEntityMapper userEntityMapper;
+
+
+    private final UserEntity userEntity = UserEntity.builder()
+            .id("1")
+            .name("Jacobo")
+            .lastName("Ossa")
+            .birthDate("1990-01-01")
+            .address("123 Main St")
+            .phoneNumber("555-1234")
+            .email("jaco@gmail.com")
+            .identificationNumber("123456789")
+            .baseSalary(50000.0)
+            .rolId("90f41a3f-3ae3-4b0b-8096-9b73cb6b2037")
+            .build();
+
+    private final Rol rol = new Rol();
+    {
+        rol.setId("90f41a3f-3ae3-4b0b-8096-9b73cb6b2037");
+        rol.setName("Admin");
+        rol.setDescription("Administrator role");
+    }
+
+    private final User user = new User();
+    {
+        user.setId("1");
+        user.setName("Jacobo");
+        user.setLastName("Ossa");
+        user.setBirthDate("1990-01-01");
+        user.setAddress("123 Main St");
+        user.setPhoneNumber("555-1234");
+        user.setEmail("jaco@gmail.com");
+        user.setIdentificationNumber("123456789");
+        user.setBaseSalary(50000.0);
+        user.setRole(rol);
+    }
+
+
 
     @Test
-    void mustFindValueById() {
+    void mustSaveNewUser() {
+        when(userEntityMapper.toDomain(userEntity)).thenReturn(user);
+        when(userEntityMapper.toEntity(user)).thenReturn(userEntity);
+        when(repository.save(any(UserEntity.class))).thenReturn(Mono.just(userEntity));
 
-        when(repository.findById("1")).thenReturn(Mono.just("test"));
-        when(mapper.map("test", Object.class)).thenReturn("test");
+        Mono<User> userMono = repositoryAdapter.save(user);
 
-        Mono<Object> result = repositoryAdapter.findById("1");
-
-        StepVerifier.create(result)
-                .expectNextMatches(value -> value.equals("test"))
+        StepVerifier.create(userMono)
+                .expectNext(user)
                 .verifyComplete();
     }
 
     @Test
-    void mustFindAllValues() {
-        when(repository.findAll()).thenReturn(Flux.just("test"));
-        when(mapper.map("test", Object.class)).thenReturn("test");
+    void mustExistByEmail() {
+        String email = "jaco@gmail.com";
+        when(repository.existsByEmail(email)).thenReturn(Mono.just(true));
 
-        Flux<Object> result = repositoryAdapter.findAll();
+        Mono<Boolean> userExist = repositoryAdapter.existByEmail(email);
 
-        StepVerifier.create(result)
-                .expectNextMatches(value -> value.equals("test"))
+        StepVerifier.create(userExist)
+                .expectNext(true)
                 .verifyComplete();
     }
 
     @Test
-    void mustFindByExample() {
-        when(repository.findAll(any(Example.class))).thenReturn(Flux.just("test"));
-        when(mapper.map("test", Object.class)).thenReturn("test");
-
-        Flux<Object> result = repositoryAdapter.findByExample("test");
-
-        StepVerifier.create(result)
-                .expectNextMatches(value -> value.equals("test"))
+    void mustNotExistByEmail() {
+        String email = "jaco@gmail.com";
+        when(repository.existsByEmail(email)).thenReturn(Mono.just(false));
+        Mono<Boolean> userExist = repositoryAdapter.existByEmail(email);
+        StepVerifier.create(userExist)
+                .expectNext(false)
                 .verifyComplete();
     }
 
     @Test
-    void mustSaveValue() {
-        when(repository.save("test")).thenReturn(Mono.just("test"));
-        when(mapper.map("test", Object.class)).thenReturn("test");
+    void mustExistByIdentificationNumber() {
+        String identificationNumber = "123456789";
+        when(repository.existsByIdentificationNumber(identificationNumber)).thenReturn(Mono.just(true));
 
-        Mono<Object> result = repositoryAdapter.save("test");
+        Mono<Boolean> userExist = repositoryAdapter.existByIdentificationNumber(identificationNumber);
 
-        StepVerifier.create(result)
-                .expectNextMatches(value -> value.equals("test"))
+        StepVerifier.create(userExist)
+                .expectNext(true)
                 .verifyComplete();
     }
+
+    @Test
+    void mustNotExistByIdentificationNumber() {
+        String identificationNumber = "123456789";
+        when(repository.existsByIdentificationNumber(identificationNumber)).thenReturn(Mono.just(false));
+        Mono<Boolean> userExist = repositoryAdapter.existByIdentificationNumber(identificationNumber);
+        StepVerifier.create(userExist)
+                .expectNext(false)
+                .verifyComplete();
+    }
+
+    @Test
+    void mustPropagateErrorWhenExistByEmailFails() {
+        when(repository.existsByEmail("jacotaco@gmail.com"))
+                .thenReturn(Mono.error(new RuntimeException("Constraint violation")));
+
+        StepVerifier.create(repositoryAdapter.existByEmail("jacotaco@gmail.com"))
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
+                        throwable.getMessage().equals("Constraint violation"))
+                .verify();
+    }
+
+    @Test
+    void mustPropagateErrorWhenExistByIdentificationNumberFails() {
+        when(repository.existsByIdentificationNumber("987654321"))
+                .thenReturn(Mono.error(new RuntimeException("Constraint violation")));
+
+        StepVerifier.create(repositoryAdapter.existByIdentificationNumber("987654321"))
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
+                        throwable.getMessage().equals("Constraint violation"))
+                .verify();
+    }
+
+
+
 }

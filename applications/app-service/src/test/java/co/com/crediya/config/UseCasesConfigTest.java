@@ -1,5 +1,7 @@
 package co.com.crediya.config;
 
+import co.com.crediya.model.rol.gateways.RolRepository;
+import co.com.crediya.model.user.gateways.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -7,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class UseCasesConfigTest {
+class UseCasesConfigTest {
 
     @Test
     void testUseCaseBeansExist() {
@@ -31,14 +33,13 @@ public class UseCasesConfigTest {
     static class TestConfig {
 
         @Bean
-        public MyUseCase myUseCase() {
-            return new MyUseCase();
+        public UserRepository userRepository() {
+            return org.mockito.Mockito.mock(UserRepository.class);
         }
-    }
 
-    static class MyUseCase {
-        public String execute() {
-            return "MyUseCase Test";
+        @Bean
+        public RolRepository rolRepository() {
+            return org.mockito.Mockito.mock(RolRepository.class);
         }
     }
 }
