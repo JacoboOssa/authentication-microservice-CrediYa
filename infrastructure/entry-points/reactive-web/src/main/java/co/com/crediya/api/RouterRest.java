@@ -4,7 +4,6 @@ import co.com.crediya.api.config.UserPath;
 import co.com.crediya.api.dto.request.CreateUserRequestDTO;
 import co.com.crediya.api.dto.response.UserResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
