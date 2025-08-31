@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import co.com.crediya.model.exceptions.BusinessException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -102,7 +103,7 @@ class UserUseCaseTest {
         StepVerifier.create(userUseCase.createUser(user))
                 .expectErrorMatches(throwable ->
                         throwable instanceof BusinessException &&
-                                throwable.getMessage().contains("This email is already in use: " + user.getEmail()))
+                                throwable.getMessage().contains(BusinessException.EMAIL_ALREADY_IN_USE + user.getEmail()))
                 .verify();
     }
 
@@ -115,7 +116,7 @@ class UserUseCaseTest {
         StepVerifier.create(userUseCase.createUser(user))
                 .expectErrorMatches(throwable ->
                         throwable instanceof BusinessException &&
-                                throwable.getMessage().contains("This identification number is already in use: " + user.getIdentificationNumber()))
+                                throwable.getMessage().contains(BusinessException.IDENTIFICATION_NUMBER_ALREADY_IN_USE + user.getIdentificationNumber()))
                 .verify();
     }
 
@@ -128,7 +129,7 @@ class UserUseCaseTest {
         StepVerifier.create(userUseCase.createUser(user))
                 .expectErrorMatches(throwable ->
                         throwable instanceof BusinessException &&
-                                throwable.getMessage().contains("Role ID does not exist: " + user.getRole().getId()))
+                                throwable.getMessage().contains(BusinessException.ROLE_ID_NOT_FOUND + user.getRole().getId()))
                 .verify();
     }
 
@@ -167,7 +168,7 @@ class UserUseCaseTest {
         StepVerifier.create(userUseCase.getEmailByIdentificationNumber("0000000000"))
                 .expectErrorMatches(throwable ->
                         throwable instanceof BusinessException &&
-                                throwable.getMessage().contains("User not found for identification number: " + "0000000000"))
+                                throwable.getMessage().contains(BusinessException.USER_WITH_IDENTIFICATION_NOT_FOUND + "0000000000"))
                 .verify();
     }
 
