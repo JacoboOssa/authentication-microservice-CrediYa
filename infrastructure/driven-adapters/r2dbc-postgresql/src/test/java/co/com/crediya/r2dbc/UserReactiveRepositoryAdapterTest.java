@@ -143,6 +143,30 @@ class UserReactiveRepositoryAdapterTest {
                 .verify();
     }
 
+    @Test
+    void mustRetrieveEmailByIdentificationNumber() {
+        String identificationNumber = "123456789";
+
+        when(repository.getEmailByIdentificationNumber(identificationNumber)).thenReturn(Mono.just("jaco@gmail.com"));
+
+        StepVerifier.create(repositoryAdapter.getEmailByIdentificationNumber(identificationNumber))
+                .expectNext("jaco@gmail.com")
+                .verifyComplete();
+    }
+
+    @Test
+    void mustPropagateErrorWhenGetEmailByIdentificationNumberFails() {
+        String identificationNumber = "123456789";
+
+        when(repository.getEmailByIdentificationNumber(identificationNumber))
+                .thenReturn(Mono.error(new RuntimeException("Database error")));
+
+        StepVerifier.create(repositoryAdapter.getEmailByIdentificationNumber(identificationNumber))
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
+                        throwable.getMessage().equals("Database error"))
+                .verify();
+    }
+
 
 
 }

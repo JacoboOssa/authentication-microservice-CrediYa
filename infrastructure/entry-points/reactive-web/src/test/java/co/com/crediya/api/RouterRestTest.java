@@ -79,6 +79,7 @@ class RouterRestTest {
 
 
     private final String saveUserPath = "/api/v1/usuarios";
+    private final String getEmailByIdNumberPath = "/api/v1/usuarios/";
 
     private final CreateUserRequestDTO createUserRequestDTO = CreateUserRequestDTO.builder()
             .name("Jacobo")
@@ -224,6 +225,41 @@ class RouterRestTest {
                 .jsonPath("$.status").isEqualTo(409)
                 .jsonPath("$.path").isEqualTo("/api/v1/usuarios");
     }
+
+    @Test
+    void mustRetrieveEmailByIdentificationNumber() {
+        String identificationNumber = "123456789";
+        String expectedEmail = "jac@gmail.com";
+
+        when(userUseCase.getEmailByIdentificationNumber(identificationNumber))
+                .thenReturn(Mono.just(expectedEmail));
+
+        webTestClient.get()
+                .uri(getEmailByIdNumberPath + identificationNumber)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.email").isEqualTo(expectedEmail);
+    }
+
+    @Test
+    void mustFailWhenIdentificationNumberDoesNotExist() {
+        String identificationNumber = "987654321";
+
+        when(userUseCase.getEmailByIdentificationNumber(identificationNumber))
+                .thenReturn(Mono.error(new BusinessException("No user found with identification number: " + identificationNumber)));
+
+        webTestClient.get()
+                .uri(getEmailByIdNumberPath + identificationNumber)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectBody()
+                .jsonPath("$.error").isEqualTo("Business Rule Violation")
+                .jsonPath("$.status").isEqualTo(409)
+                .jsonPath("$.path").isEqualTo("/api/v1/usuarios/" + identificationNumber);
+    }
+
+
 
 
 
