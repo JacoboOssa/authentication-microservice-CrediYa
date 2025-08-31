@@ -32,20 +32,20 @@ public class UserUseCase {
     public Mono<Void> validateIfEmailExists(String email) {
         return userRepository.existByEmail(email)
                 .filter(emailExists -> !emailExists)
-                .switchIfEmpty(Mono.error(new BusinessException("This email is already in use: " + email)))
+                .switchIfEmpty(Mono.error(new BusinessException(BusinessException.EMAIL_ALREADY_IN_USE + email)))
                 .then();
     }
 
     public Mono<Void> validateIfIdentificationNumberExists(String identificationNumber) {
         return userRepository.existByIdentificationNumber(identificationNumber)
                 .filter(idExists -> !idExists)
-                .switchIfEmpty(Mono.error(new BusinessException("This identification number is already in use: " + identificationNumber)))
+                .switchIfEmpty(Mono.error(new BusinessException(BusinessException.IDENTIFICATION_NUMBER_ALREADY_IN_USE + identificationNumber)))
                 .then();
     }
 
     public Mono<Void> validateIfRoleIdExists(String roleId) {
         return rolRepository.findById(roleId)
-                .switchIfEmpty(Mono.error(new BusinessException("Role ID does not exist: " + roleId)))
+                .switchIfEmpty(Mono.error(new BusinessException(BusinessException.ROLE_ID_NOT_FOUND + roleId)))
                 .then();
     }
 
@@ -63,7 +63,7 @@ public class UserUseCase {
     public Mono<String> getEmailByIdentificationNumber(String identificationNumber) {
         return userRepository.getEmailByIdentificationNumber(identificationNumber)
                 .switchIfEmpty(Mono.error(new BusinessException(
-                        "User not found for identification number: " + identificationNumber
+                        BusinessException.USER_WITH_IDENTIFICATION_NOT_FOUND + identificationNumber
                 )));
     }
 
