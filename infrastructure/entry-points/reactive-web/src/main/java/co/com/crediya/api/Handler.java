@@ -27,7 +27,7 @@ public class Handler {
 
 
 
-    public Mono<ServerResponse> listenSaveUser(ServerRequest serverRequest) {
+    public Mono<ServerResponse> saveUser(ServerRequest serverRequest) {
         log.info("Received request to create user");
         return transactionalAdapter.executeInTransaction(
                 serverRequest.bodyToMono(CreateUserRequestDTO.class)
@@ -43,7 +43,7 @@ public class Handler {
         );
     }
 
-    public Mono<ServerResponse> listenGetAllUsers(ServerRequest serverRequest) {
+    public Mono<ServerResponse> getAllUsers(ServerRequest serverRequest) {
         log.info("Received request to get all users");
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -52,7 +52,7 @@ public class Handler {
                 .doOnError(error -> log.error("Error retrieving users: {}", error.getMessage()));
     }
 
-    public Mono<ServerResponse> listenGetEmailByIdentificationNumber(ServerRequest serverRequest) {
+    public Mono<ServerResponse> getEmailByIdentificationNumber(ServerRequest serverRequest) {
         String identificationNumber = serverRequest.pathVariable("identificationNumber");
         log.info("Received request to get email by identification number: {}", identificationNumber);
 

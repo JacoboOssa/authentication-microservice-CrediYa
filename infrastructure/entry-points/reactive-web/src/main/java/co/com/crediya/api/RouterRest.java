@@ -4,6 +4,7 @@ import co.com.crediya.api.config.UserPath;
 import co.com.crediya.api.dto.request.CreateUserRequestDTO;
 import co.com.crediya.api.dto.response.UserResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -35,13 +36,13 @@ public class RouterRest {
                     produces = MediaType.APPLICATION_JSON_VALUE,
                     method = RequestMethod.POST,
                     beanClass = Handler.class,
-                    beanMethod = "listenSaveUser",
+                    beanMethod = "saveUser",
                     operation = @Operation(
                             summary = "Create User",
                             requestBody = @RequestBody(
                                     content = @Content(schema = @Schema(implementation = CreateUserRequestDTO.class))
                             ),
-                            operationId = "listenSaveUser",
+                            operationId = "saveUser",
                             responses = @ApiResponse(
                                     responseCode = "200",
                                     description = "Successful operation",
@@ -54,21 +55,37 @@ public class RouterRest {
                     produces = MediaType.APPLICATION_JSON_VALUE,
                     method = RequestMethod.GET,
                     beanClass = Handler.class,
-                    beanMethod = "listenGetAllUsers",
+                    beanMethod = "getAllUsers",
                     operation = @Operation(
                             summary = "Get All Users",
-                            operationId = "listenGetAllUsers",
+                            operationId = "getAllUsers",
                             responses = @ApiResponse(
                                     responseCode = "200",
                                     description = "Successful operation",
                                     content = @Content(schema = @Schema(implementation = UserResponseDTO.class))
                             )
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/v1/usuarios/email/{identificationNumber}",
+                    produces = MediaType.APPLICATION_JSON_VALUE,
+                    method = RequestMethod.GET,
+                    beanClass = Handler.class,
+                    beanMethod = "getEmailByIdentificationNumber",
+                    operation = @Operation(
+                            summary = "Get User Email by Identification Number",
+                            operationId = "getEmailByIdentificationNumber",
+                            responses = @ApiResponse(
+                                    responseCode = "200",
+                                    description = "Successful operation",
+                                    content = @Content(schema = @Schema(implementation = String.class))
+                            )
+                    )
             )
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
-        return route(POST(userPath.getSaveUser()), handler::listenSaveUser)
-                .andRoute(GET(userPath.getGetAllUsers()), handler::listenGetAllUsers)
-                .andRoute(GET(userPath.getGetUserEmailByIdNumber()), handler::listenGetEmailByIdentificationNumber);
+        return route(POST(userPath.getSaveUser()), handler::saveUser)
+                .andRoute(GET(userPath.getGetAllUsers()), handler::getAllUsers)
+                .andRoute(GET(userPath.getGetUserEmailByIdNumber()), handler::getEmailByIdentificationNumber);
     }
 }
