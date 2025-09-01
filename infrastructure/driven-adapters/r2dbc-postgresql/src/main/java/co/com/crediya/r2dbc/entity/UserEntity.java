@@ -28,7 +28,7 @@ public class UserEntity {
     private String phoneNumber;
     @Column("email")
     private String email;
-    @Column
+    @Column("password")
     private String password;
     @Column("identification_number")
     private String identificationNumber;
