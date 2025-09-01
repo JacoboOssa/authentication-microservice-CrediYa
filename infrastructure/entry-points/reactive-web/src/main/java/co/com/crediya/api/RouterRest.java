@@ -2,6 +2,8 @@ package co.com.crediya.api;
 
 import co.com.crediya.api.config.UserPath;
 import co.com.crediya.api.dto.request.CreateUserRequestDTO;
+import co.com.crediya.api.dto.request.LogInDTO;
+import co.com.crediya.api.dto.response.TokenDTO;
 import co.com.crediya.api.dto.response.UserResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -80,12 +82,32 @@ public class RouterRest {
                                     content = @Content(schema = @Schema(implementation = String.class))
                             )
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/v1/usuarios/login",
+                    produces = MediaType.APPLICATION_JSON_VALUE,
+                    method = RequestMethod.POST,
+                    beanClass = Handler.class,
+                    beanMethod = "logIn",
+                    operation = @Operation(
+                            summary = "User Log In",
+                            operationId = "logIn",
+                            requestBody = @RequestBody(
+                                    content = @Content(schema = @Schema(implementation = LogInDTO.class))
+                            ),
+                            responses = @ApiResponse(
+                                    responseCode = "200",
+                                    description = "Successful operation",
+                                    content = @Content(schema = @Schema(implementation = TokenDTO.class))
+                            )
+                    )
             )
+
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(POST(userPath.getSaveUser()), handler::saveUser)
                 .andRoute(GET(userPath.getGetAllUsers()), handler::getAllUsers)
                 .andRoute(GET(userPath.getGetUserEmailByIdNumber()), handler::getEmailByIdentificationNumber)
-                .andRoute(POST("/auth/api/v1/login"), handler::logIn);
+                .andRoute(POST(userPath.getLogIn()), handler::logIn);
     }
 }

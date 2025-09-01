@@ -18,6 +18,8 @@ public class JwtFilter implements WebFilter {
         String path = request.getPath().value();
         if(path.contains("auth"))
             return chain.filter(exchange);
+        if (path.contains("swagger") || path.contains("v3/api-docs"))
+            return chain.filter(exchange);
         String auth = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if(auth == null)
             return Mono.error(new JwtException(JwtException.TOKEN_NOT_FOUND));
