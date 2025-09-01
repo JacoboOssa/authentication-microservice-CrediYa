@@ -38,4 +38,9 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     public Mono<Boolean> existByIdentificationNumber(String identificationNumber) {
         return repository.existsByIdentificationNumber(identificationNumber) ;
     }
+
+    @Override
+    public Mono<String> getEmailByIdentificationNumber(String identificationNumber) {
+        return repository.getEmailByIdentificationNumber(identificationNumber);
+    }
 }

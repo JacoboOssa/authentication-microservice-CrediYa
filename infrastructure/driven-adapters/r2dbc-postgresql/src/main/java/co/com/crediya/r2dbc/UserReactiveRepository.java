@@ -1,6 +1,7 @@
 package co.com.crediya.r2dbc;
 
 import co.com.crediya.r2dbc.entity.UserEntity;
+import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Mono;
@@ -8,4 +9,7 @@ import reactor.core.publisher.Mono;
 public interface UserReactiveRepository extends ReactiveCrudRepository<UserEntity, String>, ReactiveQueryByExampleExecutor<UserEntity> {
     Mono<Boolean> existsByEmail(String email);
     Mono<Boolean> existsByIdentificationNumber(String identificationNumber);
+    @Query("SELECT email FROM users WHERE identification_number = :identificationNumber")
+    Mono<String> getEmailByIdentificationNumber(String identificationNumber);
+
 }

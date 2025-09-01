@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -26,8 +27,6 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 public class RouterRest {
 
     private final UserPath userPath;
-    private final Handler userHandler;
-
 
     @Bean
     @RouterOperations({
@@ -36,22 +35,56 @@ public class RouterRest {
                     produces = MediaType.APPLICATION_JSON_VALUE,
                     method = RequestMethod.POST,
                     beanClass = Handler.class,
-                    beanMethod = "listenSaveUser",
+                    beanMethod = "saveUser",
                     operation = @Operation(
                             summary = "Create User",
                             requestBody = @RequestBody(
                                     content = @Content(schema = @Schema(implementation = CreateUserRequestDTO.class))
                             ),
-                            operationId = "listenSaveUser",
+                            operationId = "saveUser",
                             responses = @ApiResponse(
                                     responseCode = "200",
                                     description = "Successful operation",
                                     content = @Content(schema = @Schema(implementation = UserResponseDTO.class))
                             )
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/v1/usuarios",
+                    produces = MediaType.APPLICATION_JSON_VALUE,
+                    method = RequestMethod.GET,
+                    beanClass = Handler.class,
+                    beanMethod = "getAllUsers",
+                    operation = @Operation(
+                            summary = "Get All Users",
+                            operationId = "getAllUsers",
+                            responses = @ApiResponse(
+                                    responseCode = "200",
+                                    description = "Successful operation",
+                                    content = @Content(schema = @Schema(implementation = UserResponseDTO.class))
+                            )
+                    )
+            ),
+            @RouterOperation(
+                    path = "/api/v1/usuarios/email/{identificationNumber}",
+                    produces = MediaType.APPLICATION_JSON_VALUE,
+                    method = RequestMethod.GET,
+                    beanClass = Handler.class,
+                    beanMethod = "getEmailByIdentificationNumber",
+                    operation = @Operation(
+                            summary = "Get User Email by Identification Number",
+                            operationId = "getEmailByIdentificationNumber",
+                            responses = @ApiResponse(
+                                    responseCode = "200",
+                                    description = "Successful operation",
+                                    content = @Content(schema = @Schema(implementation = String.class))
+                            )
+                    )
             )
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
-        return route(POST(userPath.getSaveUser()), userHandler::listenSaveUser);
+        return route(POST(userPath.getSaveUser()), handler::saveUser)
+                .andRoute(GET(userPath.getGetAllUsers()), handler::getAllUsers)
+                .andRoute(GET(userPath.getGetUserEmailByIdNumber()), handler::getEmailByIdentificationNumber);
     }
 }

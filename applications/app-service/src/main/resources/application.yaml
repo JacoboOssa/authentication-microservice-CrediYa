@@ -29,8 +29,10 @@ management:
       probes:
         enabled: true
 cors:
-  allowed-origins: "http://localhost:4200,http://localhost:8080"
+  allowed-origins: "http://localhost:4200,http://localhost:8080,http://localhost:8081"
 
 routes:
   paths:
     saveUser: "/api/v1/usuarios"
+    get-all-users: "/api/v1/usuarios"
+    get-user-email-by-id-number: "/api/v1/usuarios/{identificationNumber}"

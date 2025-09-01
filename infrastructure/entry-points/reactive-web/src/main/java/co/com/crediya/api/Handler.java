@@ -1,6 +1,7 @@
 package co.com.crediya.api;
 
 import co.com.crediya.api.dto.request.CreateUserRequestDTO;
+import co.com.crediya.api.dto.response.UserResponseDTO;
 import co.com.crediya.api.mapper.UserDTOMapper;
 import co.com.crediya.api.validator.UserValidator;
 import co.com.crediya.transaction.TransactionalAdapter;
@@ -13,6 +14,8 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -24,7 +27,7 @@ public class Handler {
 
 
 
-    public Mono<ServerResponse> listenSaveUser(ServerRequest serverRequest) {
+    public Mono<ServerResponse> saveUser(ServerRequest serverRequest) {
         log.info("Received request to create user");
         return transactionalAdapter.executeInTransaction(
                 serverRequest.bodyToMono(CreateUserRequestDTO.class)
@@ -39,5 +42,27 @@ public class Handler {
                                 .bodyValue(dto))
         );
     }
+
+    public Mono<ServerResponse> getAllUsers(ServerRequest serverRequest) {
+        log.info("Received request to get all users");
+        return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(userUseCase.getAllUsers().map(userDTOMapper::toDto), UserResponseDTO.class)
+                .doOnSuccess(users -> log.info("Successfully retrieved all users"))
+                .doOnError(error -> log.error("Error retrieving users: {}", error.getMessage()));
+    }
+
+    public Mono<ServerResponse> getEmailByIdentificationNumber(ServerRequest serverRequest) {
+        String identificationNumber = serverRequest.pathVariable("identificationNumber");
+        log.info("Received request to get email by identification number: {}", identificationNumber);
+
+        return userUseCase.getEmailByIdentificationNumber(identificationNumber)
+                .flatMap(email -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(Map.of("email", email)))
+                .doOnSuccess(response -> log.info("Successfully retrieved email for identification number: {}", identificationNumber))
+                .doOnError(error -> log.error("Error retrieving email for identification number {}: {}", identificationNumber, error.getMessage()));
+    }
+
 
 }
