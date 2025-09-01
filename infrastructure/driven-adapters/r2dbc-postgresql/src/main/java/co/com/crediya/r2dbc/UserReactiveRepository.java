@@ -11,5 +11,6 @@ public interface UserReactiveRepository extends ReactiveCrudRepository<UserEntit
     Mono<Boolean> existsByIdentificationNumber(String identificationNumber);
     @Query("SELECT email FROM users WHERE identification_number = :identificationNumber")
     Mono<String> getEmailByIdentificationNumber(String identificationNumber);
+    Mono<UserEntity> findByEmail(String email);
 
 }
