@@ -28,6 +28,8 @@ public class UserEntity {
     private String phoneNumber;
     @Column("email")
     private String email;
+    @Column
+    private String password;
     @Column("identification_number")
     private String identificationNumber;
     @Column("base_salary")
