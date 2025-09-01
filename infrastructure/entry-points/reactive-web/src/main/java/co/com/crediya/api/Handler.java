@@ -1,10 +1,12 @@
 package co.com.crediya.api;
 
 import co.com.crediya.api.dto.request.CreateUserRequestDTO;
+import co.com.crediya.api.dto.request.LogInDTO;
 import co.com.crediya.api.dto.response.UserResponseDTO;
 import co.com.crediya.api.mapper.UserDTOMapper;
 import co.com.crediya.api.validator.UserValidator;
 import co.com.crediya.transaction.TransactionalAdapter;
+import co.com.crediya.usecase.login.LogInUseCase;
 import co.com.crediya.usecase.user.UserUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class Handler {
     private final UserUseCase userUseCase;
+    private final LogInUseCase logInUseCase;
     private final UserDTOMapper userDTOMapper;
     private final UserValidator userValidator;
     private final TransactionalAdapter transactionalAdapter;
@@ -62,6 +65,22 @@ public class Handler {
                         .bodyValue(Map.of("email", email)))
                 .doOnSuccess(response -> log.info("Successfully retrieved email for identification number: {}", identificationNumber))
                 .doOnError(error -> log.error("Error retrieving email for identification number {}: {}", identificationNumber, error.getMessage()));
+    }
+
+    //Make handler for logIn, we recieve LoginDTO an return TokenDTO
+    public Mono<ServerResponse> logIn(ServerRequest serverRequest) {
+        log.info("Received request to log in");
+        return serverRequest.bodyToMono(LogInDTO.class)
+                .flatMap(body -> {
+                    String email = body.email();
+                    String password =body.password();
+                    return logInUseCase.logIn(email, password);
+                })
+                .flatMap(token -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(Map.of("token", token)))
+                .doOnSuccess(response -> log.info("User logged in successfully"))
+                .doOnError(error -> log.error("Error logging in user: {}", error.getMessage()));
     }
 
 

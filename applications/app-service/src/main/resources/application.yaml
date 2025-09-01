@@ -33,6 +33,6 @@ cors:
 
 routes:
   paths:
-    saveUser: "/api/v1/usuarios"
+    saveUser: "/auth/api/v1/usuarios"
     get-all-users: "/api/v1/usuarios"
     get-user-email-by-id-number: "/api/v1/usuarios/{identificationNumber}"
