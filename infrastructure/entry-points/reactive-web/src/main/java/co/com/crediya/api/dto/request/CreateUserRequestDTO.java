@@ -23,6 +23,8 @@ public record CreateUserRequestDTO(
         @Email(message = "Email should be valid")
         @NotBlank(message = "Email is required")
         String email,
+        @NotBlank(message = "Password is required")
+        String password,
         @NotNull(message = "Base salary is required")
         @Min(value = 0, message = "Base salary must be positive")
         @Max(value = 15000000, message = "Base salary must be less than or equal to 15,000,000")

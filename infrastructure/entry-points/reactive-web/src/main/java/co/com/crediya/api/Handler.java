@@ -11,6 +11,7 @@ import co.com.crediya.usecase.user.UserUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -30,6 +31,7 @@ public class Handler {
 
 
 
+    @PreAuthorize("hasAnyRole('ASESOR', 'ADMIN')")
     public Mono<ServerResponse> saveUser(ServerRequest serverRequest) {
         log.info("Received request to create user");
         return transactionalAdapter.executeInTransaction(
@@ -46,6 +48,7 @@ public class Handler {
         );
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<ServerResponse> getAllUsers(ServerRequest serverRequest) {
         log.info("Received request to get all users");
         return ServerResponse.ok()
@@ -55,6 +58,7 @@ public class Handler {
                 .doOnError(error -> log.error("Error retrieving users: {}", error.getMessage()));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<ServerResponse> getEmailByIdentificationNumber(ServerRequest serverRequest) {
         String identificationNumber = serverRequest.pathVariable("identificationNumber");
         log.info("Received request to get email by identification number: {}", identificationNumber);
@@ -67,7 +71,7 @@ public class Handler {
                 .doOnError(error -> log.error("Error retrieving email for identification number {}: {}", identificationNumber, error.getMessage()));
     }
 
-    //Make handler for logIn, we recieve LoginDTO an return TokenDTO
+
     public Mono<ServerResponse> logIn(ServerRequest serverRequest) {
         log.info("Received request to log in");
         return serverRequest.bodyToMono(LogInDTO.class)
