@@ -70,13 +70,4 @@ public class UserUseCase {
                         BusinessException.USER_WITH_IDENTIFICATION_NOT_FOUND + identificationNumber
                 )));
     }
-
-
-
-
-
-
-
-
-
 }
