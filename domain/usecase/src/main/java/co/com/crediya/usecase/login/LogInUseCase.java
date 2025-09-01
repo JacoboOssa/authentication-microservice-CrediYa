@@ -23,7 +23,7 @@ public class LogInUseCase {
                 .flatMap(authRepository::generateToken);
     }
 
-    private Mono<User> validateCredentials(User user, String password) {
+    public Mono<User> validateCredentials(User user, String password) {
         if (!authRepository.verifyPassword(password, user.getPassword())) {
             return Mono.error(new BusinessException(BusinessException.BAD_CREDENTIALS));
         }

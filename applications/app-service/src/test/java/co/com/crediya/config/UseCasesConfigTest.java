@@ -1,6 +1,7 @@
 package co.com.crediya.config;
 
 import co.com.crediya.model.rol.gateways.RolRepository;
+import co.com.crediya.model.user.gateways.AuthRepository;
 import co.com.crediya.model.user.gateways.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -40,6 +41,11 @@ class UseCasesConfigTest {
         @Bean
         public RolRepository rolRepository() {
             return org.mockito.Mockito.mock(RolRepository.class);
+        }
+
+        @Bean
+        public AuthRepository authRepository() {
+            return org.mockito.Mockito.mock(AuthRepository.class);
         }
     }
 }

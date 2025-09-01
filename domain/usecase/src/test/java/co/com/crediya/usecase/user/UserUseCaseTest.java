@@ -4,6 +4,7 @@ import co.com.crediya.model.exceptions.BusinessException;
 import co.com.crediya.model.rol.Rol;
 import co.com.crediya.model.rol.gateways.RolRepository;
 import co.com.crediya.model.user.User;
+import co.com.crediya.model.user.gateways.AuthRepository;
 import co.com.crediya.model.user.gateways.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import co.com.crediya.model.exceptions.BusinessException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -26,6 +26,9 @@ class UserUseCaseTest {
 
     @Mock
     private RolRepository rolRepository;
+
+    @Mock
+    private AuthRepository authRepository;
 
     @InjectMocks
     private UserUseCase userUseCase;
@@ -86,6 +89,7 @@ class UserUseCaseTest {
         when(userRepository.existByEmail(user.getEmail())).thenReturn(Mono.just(false));
         when(userRepository.existByIdentificationNumber(user.getIdentificationNumber())).thenReturn(Mono.just(false));
         when(rolRepository.findById(user.getRole().getId())).thenReturn(Mono.just(user.getRole()));
+        when(authRepository.hashPassword(user.getPassword())).thenReturn("hashedPassword");
         when(userRepository.save(any(User.class))).thenReturn(Mono.just(user));
 
 
