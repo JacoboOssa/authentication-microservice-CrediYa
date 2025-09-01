@@ -3,6 +3,7 @@ package co.com.crediya.usecase.user;
 import co.com.crediya.model.exceptions.BusinessException;
 import co.com.crediya.model.rol.gateways.RolRepository;
 import co.com.crediya.model.user.User;
+import co.com.crediya.model.user.gateways.AuthRepository;
 import co.com.crediya.model.user.gateways.UserRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -10,10 +11,12 @@ import reactor.core.publisher.Mono;
 public class UserUseCase {
    private final UserRepository userRepository;
    private final RolRepository rolRepository;
+   private final AuthRepository authRepository;
 
-    public UserUseCase(UserRepository userRepository, RolRepository rolRepository) {
+    public UserUseCase(UserRepository userRepository, RolRepository rolRepository, AuthRepository authRepository) {
         this.userRepository = userRepository;
         this.rolRepository = rolRepository;
+        this.authRepository = authRepository;
     }
 
     public Mono<User> createUser(User user) {
@@ -23,6 +26,7 @@ public class UserUseCase {
                 .then(rolRepository.findById(user.getRole().getId()))
                 .map(role -> {
                     user.setRole(role);
+                    user.setPassword(authRepository.hashPassword(user.getPassword()));
                     return user;
                 })
                 .flatMap(userRepository::save);
