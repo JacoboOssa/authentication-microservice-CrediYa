@@ -91,15 +91,9 @@ public class Handler {
     }
 
     public Mono<ServerResponse> validateToken(ServerRequest serverRequest) {
-        log.info("Received request to validate token");
-        String token = serverRequest.headers().firstHeader("Authorization");
-        if (token == null || !token.startsWith("Bearer ")) {
-            log.error("No authorization header found");
-            throw new JwtException(JwtException.TOKEN_NOT_FOUND);
-        }
-        token = token.replace("Bearer ", "");
-
-        return validateTokenUseCase.validateToken(token)
+        String jwt = serverRequest.pathVariable("jwt");
+        log.info("Received request to validate token: {}", jwt);
+        return validateTokenUseCase.validateToken(jwt)
                 .doOnSuccess(user -> log.info("Token válido para " + user.getEmail()))
                 .doOnError(e -> log.error("Error validando token: " + e.getMessage()))
                 .flatMap(user -> ServerResponse.ok()
