@@ -2,7 +2,6 @@ package co.com.crediya.usecase.login;
 
 
 import co.com.crediya.model.exceptions.BusinessException;
-import co.com.crediya.model.rol.gateways.RolRepository;
 import co.com.crediya.model.user.User;
 import co.com.crediya.model.user.gateways.AuthRepository;
 import co.com.crediya.model.user.gateways.UserRepository;

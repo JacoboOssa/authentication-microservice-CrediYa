@@ -35,7 +35,7 @@ public class Handler {
 
 
 
-    @PreAuthorize("hasAnyRole('ASESOR')")
+    @PreAuthorize("hasAnyRole('ASESOR','ADMIN')")
     public Mono<ServerResponse> saveUser(ServerRequest serverRequest) {
         log.info("Received request to create user");
         return transactionalAdapter.executeInTransaction(

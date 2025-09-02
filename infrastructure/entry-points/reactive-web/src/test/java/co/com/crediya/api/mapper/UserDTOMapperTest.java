@@ -5,12 +5,11 @@ import co.com.crediya.api.dto.response.UserResponseDTO;
 import co.com.crediya.model.rol.Rol;
 import co.com.crediya.model.user.User;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class UserDTOMapperTest {
+class UserDTOMapperTest {
 
     private final UserDTOMapper userDTOMapper = Mappers.getMapper(UserDTOMapper.class);
 
