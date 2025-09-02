@@ -8,13 +8,17 @@ import co.com.crediya.api.dto.response.UserResponseDTO;
 import co.com.crediya.api.exceptionhandler.GlobalErrorAttributes;
 import co.com.crediya.api.exceptionhandler.GlobalExceptionHandler;
 import co.com.crediya.api.mapper.UserDTOMapper;
+import co.com.crediya.api.util.LoginDTOUtil;
+import co.com.crediya.api.util.UserUtil;
 import co.com.crediya.api.validator.UserValidator;
 import co.com.crediya.model.exceptions.BusinessException;
+import co.com.crediya.model.exceptions.JwtException;
 import co.com.crediya.model.rol.Rol;
 import co.com.crediya.model.user.User;
 import co.com.crediya.transaction.TransactionalAdapter;
 import co.com.crediya.usecase.login.LogInUseCase;
 import co.com.crediya.usecase.user.UserUseCase;
+import co.com.crediya.usecase.validatetoken.ValidateTokenUseCase;
 import jakarta.validation.ConstraintViolationException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -28,6 +32,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Set;
@@ -38,7 +43,7 @@ import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {RouterRest.class, Handler.class})
 @EnableConfigurationProperties(UserPath.class)
-@TestPropertySource(properties = {"routes.paths.save-user=/api/v1/usuarios", "routes.paths.get-all-users=/api/v1/usuarios", "routes.paths.get-user-email-by-id-number=/api/v1/usuarios/{identificationNumber}", "routes.paths.log-in=/auth/api/v1/login"})
+@TestPropertySource(properties = {"routes.paths.save-user=/api/v1/usuarios", "routes.paths.get-all-users=/api/v1/usuarios", "routes.paths.get-user-email-by-id-number=/api/v1/usuarios/{identificationNumber}", "routes.paths.log-in=/auth/api/v1/login", "routes.paths.validate=/auth/api/v1/validate"})
 @WebFluxTest
 @Import({GlobalExceptionHandler.class, GlobalErrorAttributes.class, TestSecurityConfig.class})
 class RouterRestTest {
@@ -51,6 +56,9 @@ class RouterRestTest {
 
     @MockitoBean
     private LogInUseCase logInUseCase;
+
+    @MockitoBean
+    private ValidateTokenUseCase validateTokenUseCase;
 
     @MockitoBean
     private UserDTOMapper userDTOMapper;
@@ -85,6 +93,9 @@ class RouterRestTest {
 
     private final String saveUserPath = "/api/v1/usuarios";
     private final String getEmailByIdNumberPath = "/api/v1/usuarios/";
+    private final String getAllUserPath = "/api/v1/usuarios";
+    private final String logInPath = "/auth/api/v1/login";
+    private final String validateTokenPath = "/auth/api/v1/validate";
 
     private final CreateUserRequestDTO createUserRequestDTO = CreateUserRequestDTO.builder()
             .name("Jacobo")
@@ -263,6 +274,74 @@ class RouterRestTest {
                 .jsonPath("$.status").isEqualTo(409)
                 .jsonPath("$.path").isEqualTo("/api/v1/usuarios/" + identificationNumber);
     }
+
+    @Test
+    void mustRetrieveAllUsers() {
+        when(userUseCase.getAllUsers()).thenReturn(Flux.just(UserUtil.user1(), UserUtil.user2()));
+        when(userUseCase.getAllUsers()).thenReturn(Flux.just(UserUtil.user1(), UserUtil.user2()));
+        when(userDTOMapper.toDto(any(User.class))).thenAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            if (user.getEmail().equals(UserUtil.user1().getEmail())) return UserUtil.userResponseDTOUser1();
+            if (user.getEmail().equals(UserUtil.user2().getEmail())) return UserUtil.userResponseDTOUser2();
+            throw new IllegalArgumentException("Usuario inesperado: " + user.getEmail());
+        });
+
+        webTestClient.get()
+                .uri(getAllUserPath)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].identificationNumber").isNotEmpty()
+                .jsonPath("$[0].email").isNotEmpty();
+    }
+
+    @Test
+    void mustLogInWithValidUser(){
+        when(logInUseCase.logIn(LoginDTOUtil.logInDTO().email(), LoginDTOUtil.logInDTO().password())).thenReturn(Mono.just("ValidToken"));
+
+        webTestClient.post()
+                .uri(logInPath)
+                .bodyValue(LoginDTOUtil.logInDTO())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.token").isNotEmpty();
+    }
+
+    @Test
+    void mustValidateTokenSuccessfully(){
+        String token = "Bearer eyJhbGciOiJIUzI1NiJ9...";
+
+        when(validateTokenUseCase.validateToken("eyJhbGciOiJIUzI1NiJ9...")).thenReturn(Mono.just(UserUtil.user1()));
+
+        webTestClient.get()
+                .uri(validateTokenPath) // tu endpoint
+                .header("Authorization", token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.email").isEqualTo(UserUtil.user1().getEmail())
+                .jsonPath("$.rol").isEqualTo(UserUtil.user1().getRole().getName());
+    }
+
+    @Test
+    void mustFailWhenInvalidToken(){
+        String token = "Bearer InvalidToken";
+
+        when(validateTokenUseCase.validateToken("InvalidToken"))
+                .thenReturn(Mono.error(new JwtException(JwtException.INVALID_TOKEN)));
+
+        webTestClient.get()
+                .uri(validateTokenPath)
+                .header("Authorization", token)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo(JwtException.INVALID_TOKEN)
+                .jsonPath("$.status").isEqualTo(401)
+                .jsonPath("$.path").isEqualTo("/auth/api/v1/validate");
+    }
+
 
 
 

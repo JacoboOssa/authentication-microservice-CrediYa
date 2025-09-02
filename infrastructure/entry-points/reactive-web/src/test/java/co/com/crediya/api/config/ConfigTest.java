@@ -12,6 +12,7 @@ import co.com.crediya.model.user.User;
 import co.com.crediya.transaction.TransactionalAdapter;
 import co.com.crediya.usecase.login.LogInUseCase;
 import co.com.crediya.usecase.user.UserUseCase;
+import co.com.crediya.usecase.validatetoken.ValidateTokenUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ import reactor.core.publisher.Mono;
 
 import static org.mockito.Mockito.when;
 
-@TestPropertySource(properties = {"routes.paths.save-user=/api/v1/usuarios", "routes.paths.get-all-users=/api/v1/usuarios", "routes.paths.get-user-email-by-id-number=/api/v1/usuarios/{identificationNumber}", "routes.paths.log-in=/auth/api/v1/login"})
+@TestPropertySource(properties = {"routes.paths.save-user=/api/v1/usuarios", "routes.paths.get-all-users=/api/v1/usuarios", "routes.paths.get-user-email-by-id-number=/api/v1/usuarios/{identificationNumber}", "routes.paths.log-in=/auth/api/v1/login", "routes.paths.validate=/auth/api/v1/validate"})
 @EnableConfigurationProperties(UserPath.class)
 @ContextConfiguration(classes = {RouterRest.class, Handler.class})
 @WebFluxTest
@@ -40,6 +41,9 @@ class ConfigTest {
 
     @MockitoBean
     private LogInUseCase logInUseCase;
+
+    @MockitoBean
+    private ValidateTokenUseCase validateTokenUseCase;
 
     @MockitoBean
     private UserDTOMapper userDTOMapper;
