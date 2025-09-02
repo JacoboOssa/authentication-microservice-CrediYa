@@ -27,6 +27,11 @@ public class JwtProvider {
     @Value("${jwt.expiration}")
     private Integer jwtExpiration;
 
+    public JwtProvider(String jwtSecret, Integer jwtExpiration) {
+        this.jwtSecret = jwtSecret;
+        this.jwtExpiration = jwtExpiration;
+    }
+
     public Mono<String> generateToken(User user) {
         return Mono.just(
                 Jwts.builder()
