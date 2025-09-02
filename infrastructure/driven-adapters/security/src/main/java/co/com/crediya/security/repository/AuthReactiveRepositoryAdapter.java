@@ -32,4 +32,9 @@ public class AuthReactiveRepositoryAdapter implements AuthRepository {
     public Mono<String> generateToken(User user) {
         return jwtProvider.generateToken(user);
     }
+
+    @Override
+    public Mono<User> validateToken(String token) {
+        return jwtProvider.validate(token);
+    }
 }

@@ -1,25 +1,24 @@
 package co.com.crediya.security.jwt.provider;
 
+import co.com.crediya.model.exceptions.JwtException;
+import co.com.crediya.model.rol.Rol;
 import co.com.crediya.model.user.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
-import org.springframework.security.core.userdetails.UserDetails;
 import reactor.core.publisher.Mono;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 
-
+@Slf4j
 @Component
 public class JwtProvider {
-
-    private static final Logger LOGGER =  Logger.getLogger(JwtProvider.class.getName());
 
 
     @Value("${jwt.secret}")
@@ -38,6 +37,47 @@ public class JwtProvider {
                         .signWith(getKey(jwtSecret))
                         .compact()
         );
+    }
+
+    public Mono<User> validate(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(getKey(jwtSecret))
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            User user = new User();
+            user.setEmail(claims.getSubject());
+
+            List<String> roles = claims.get("rol", List.class);
+            Rol rol = new Rol();
+            if (roles != null && !roles.isEmpty()) {
+                rol.setName(roles.get(0));
+            }
+            user.setRole(rol);
+
+
+            return Mono.just(user);
+
+        } catch (ExpiredJwtException e) {
+            log.error(e.getMessage());
+            return Mono.error(new JwtException(JwtException.TOKEN_EXPIRED));
+        } catch (UnsupportedJwtException e) {
+            log.error(e.getMessage());
+            return Mono.error(new JwtException(JwtException.TOKEN_UNSUPPORTED));
+        } catch (MalformedJwtException e) {
+            log.error(e.getMessage());
+            return Mono.error(new JwtException(JwtException.TOKEN_MALFORMED));
+        } catch (SignatureException e){
+            log.error(e.getMessage());
+            return Mono.error(new JwtException(JwtException.INVALID_TOKEN));
+        }
+
+        catch (IllegalArgumentException e) {
+            log.error(e.getMessage());
+            return Mono.error(new JwtException(JwtException.ILEGAL_ARGUMENTS));
+        }
     }
 
     private List<String> extractRoles(User user) {
@@ -65,26 +105,6 @@ public class JwtProvider {
                 .getSubject();
     }
 
-    public boolean validate(String token){
-        try {
-            Jwts.parser()
-                    .verifyWith(getKey(jwtSecret))
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .getSubject();
-            return true;
-        } catch (ExpiredJwtException e) {
-            LOGGER.severe("token expired");
-        } catch (UnsupportedJwtException e) {
-            LOGGER.severe("token unsupported");
-        } catch (MalformedJwtException e) {
-            LOGGER.severe("token malformed");
-        } catch (IllegalArgumentException e) {
-            LOGGER.severe("illegal args");
-        }
-        return false;
-    }
 
     private SecretKey getKey(String secret) {
         byte[] secretBytes = Decoders.BASE64URL.decode(secret);

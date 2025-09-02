@@ -14,4 +14,5 @@ public class UserPath {
     private String getAllUsers;
     private String getUserEmailByIdNumber;
     private String logIn;
+    private String validate;
 }

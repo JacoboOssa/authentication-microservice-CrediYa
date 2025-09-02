@@ -3,11 +3,14 @@ package co.com.crediya.api;
 import co.com.crediya.api.dto.request.CreateUserRequestDTO;
 import co.com.crediya.api.dto.request.LogInDTO;
 import co.com.crediya.api.dto.response.UserResponseDTO;
+import co.com.crediya.api.dto.response.ValidatedTokenDTO;
 import co.com.crediya.api.mapper.UserDTOMapper;
 import co.com.crediya.api.validator.UserValidator;
+import co.com.crediya.model.exceptions.JwtException;
 import co.com.crediya.transaction.TransactionalAdapter;
 import co.com.crediya.usecase.login.LogInUseCase;
 import co.com.crediya.usecase.user.UserUseCase;
+import co.com.crediya.usecase.validatetoken.ValidateTokenUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -25,13 +28,14 @@ import java.util.Map;
 public class Handler {
     private final UserUseCase userUseCase;
     private final LogInUseCase logInUseCase;
+    private final ValidateTokenUseCase validateTokenUseCase;
     private final UserDTOMapper userDTOMapper;
     private final UserValidator userValidator;
     private final TransactionalAdapter transactionalAdapter;
 
 
 
-    @PreAuthorize("hasAnyRole('ASESOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('ASESOR')")
     public Mono<ServerResponse> saveUser(ServerRequest serverRequest) {
         log.info("Received request to create user");
         return transactionalAdapter.executeInTransaction(
@@ -58,7 +62,6 @@ public class Handler {
                 .doOnError(error -> log.error("Error retrieving users: {}", error.getMessage()));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     public Mono<ServerResponse> getEmailByIdentificationNumber(ServerRequest serverRequest) {
         String identificationNumber = serverRequest.pathVariable("identificationNumber");
         log.info("Received request to get email by identification number: {}", identificationNumber);
@@ -87,5 +90,27 @@ public class Handler {
                 .doOnError(error -> log.error("Error logging in user: {}", error.getMessage()));
     }
 
+    public Mono<ServerResponse> validateToken(ServerRequest serverRequest) {
+        log.info("Received request to validate token");
+        String token = serverRequest.headers().firstHeader("Authorization");
+        if (token == null || !token.startsWith("Bearer ")) {
+            log.error("No authorization header found");
+            throw new JwtException(JwtException.TOKEN_NOT_FOUND);
+        }
+        token = token.replace("Bearer ", "");
+
+        return validateTokenUseCase.validateToken(token)
+                .doOnSuccess(user -> log.info("Token válido para " + user.getEmail()))
+                .doOnError(e -> log.error("Error validando token: " + e.getMessage()))
+                .flatMap(user -> ServerResponse.ok()
+                        .bodyValue(
+                                ValidatedTokenDTO.builder()
+                                        .email(user.getEmail())
+                                        .rol(user.getRole().getName())
+                                        .build()
+                        )
+                );
+
+    }
 
 }

@@ -6,4 +6,5 @@ public interface AuthRepository {
     String hashPassword(String rawPassword);
     boolean verifyPassword(String rawPassword, String hashedPassword);
     Mono<String> generateToken(User user);
+    Mono<User> validateToken(String token);
 }
