@@ -5,19 +5,16 @@ import co.com.crediya.model.rol.gateways.RolRepository;
 import co.com.crediya.model.user.User;
 import co.com.crediya.model.user.gateways.AuthRepository;
 import co.com.crediya.model.user.gateways.UserRepository;
+import lombok.AllArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@AllArgsConstructor
 public class UserUseCase {
    private final UserRepository userRepository;
    private final RolRepository rolRepository;
    private final AuthRepository authRepository;
 
-    public UserUseCase(UserRepository userRepository, RolRepository rolRepository, AuthRepository authRepository) {
-        this.userRepository = userRepository;
-        this.rolRepository = rolRepository;
-        this.authRepository = authRepository;
-    }
 
     public Mono<User> createUser(User user) {
         return validateIfEmailExists(user.getEmail())
