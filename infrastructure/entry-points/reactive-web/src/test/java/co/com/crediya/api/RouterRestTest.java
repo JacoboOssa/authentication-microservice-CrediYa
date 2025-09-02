@@ -1,5 +1,6 @@
 package co.com.crediya.api;
 
+import co.com.crediya.api.config.TestSecurityConfig;
 import co.com.crediya.api.config.UserPath;
 import co.com.crediya.api.dto.request.CreateUserRequestDTO;
 import co.com.crediya.api.dto.response.RoleDTO;
@@ -12,6 +13,7 @@ import co.com.crediya.model.exceptions.BusinessException;
 import co.com.crediya.model.rol.Rol;
 import co.com.crediya.model.user.User;
 import co.com.crediya.transaction.TransactionalAdapter;
+import co.com.crediya.usecase.login.LogInUseCase;
 import co.com.crediya.usecase.user.UserUseCase;
 import jakarta.validation.ConstraintViolationException;
 import org.assertj.core.api.Assertions;
@@ -36,9 +38,9 @@ import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {RouterRest.class, Handler.class})
 @EnableConfigurationProperties(UserPath.class)
-@TestPropertySource(properties = {"routes.paths.save-user=/api/v1/usuarios", "routes.paths.get-all-users=/api/v1/usuarios", "routes.paths.get-user-email-by-id-number=/api/v1/usuarios/{identificationNumber}"})
+@TestPropertySource(properties = {"routes.paths.save-user=/api/v1/usuarios", "routes.paths.get-all-users=/api/v1/usuarios", "routes.paths.get-user-email-by-id-number=/api/v1/usuarios/{identificationNumber}", "routes.paths.log-in=/auth/api/v1/login"})
 @WebFluxTest
-@Import({GlobalExceptionHandler.class, GlobalErrorAttributes.class})
+@Import({GlobalExceptionHandler.class, GlobalErrorAttributes.class, TestSecurityConfig.class})
 class RouterRestTest {
 
     @Autowired
@@ -46,6 +48,9 @@ class RouterRestTest {
 
     @MockitoBean
     private UserUseCase userUseCase;
+
+    @MockitoBean
+    private LogInUseCase logInUseCase;
 
     @MockitoBean
     private UserDTOMapper userDTOMapper;
