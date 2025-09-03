@@ -62,6 +62,7 @@ public class Handler {
                 .doOnError(error -> log.error("Error retrieving users: {}", error.getMessage()));
     }
 
+    @PreAuthorize("hasAnyRole('ASESOR','ADMIN')")
     public Mono<ServerResponse> getEmailByIdentificationNumber(ServerRequest serverRequest) {
         String identificationNumber = serverRequest.pathVariable("identificationNumber");
         log.info("Received request to get email by identification number: {}", identificationNumber);

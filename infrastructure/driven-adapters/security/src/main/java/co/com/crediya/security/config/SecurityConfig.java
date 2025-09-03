@@ -1,5 +1,6 @@
 package co.com.crediya.security.config;
 
+import co.com.crediya.model.exceptions.AuthorizationException;
 import co.com.crediya.security.jwt.filter.JwtFilter;
 import co.com.crediya.security.repository.SecurityContextRepository;
 import lombok.AllArgsConstructor;
@@ -34,10 +35,19 @@ public class SecurityConfig {
                         .anyExchange().authenticated())
                 .addFilterAfter(jwtFilter, SecurityWebFiltersOrder.FIRST)
                 .securityContextRepository(securityContextRepository)
+                .exceptionHandling(exceptionHandlingSpec -> exceptionHandlingSpec
+                        .accessDeniedHandler((exchange, denied) ->
+                                reactor.core.publisher.Mono.error(
+                                        new AuthorizationException(AuthorizationException.FORBIDDEN)
+                                )
+                        )
+                )
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .logout(ServerHttpSecurity.LogoutSpec::disable)
                 .build();
     }
+
+
 
 }

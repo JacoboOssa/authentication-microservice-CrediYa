@@ -1,5 +1,7 @@
 package co.com.crediya.api.exceptionhandler;
 
+import co.com.crediya.model.exceptions.AuthorizationException;
+import org.springframework.security.access.AccessDeniedException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -21,6 +23,7 @@ public class GlobalErrorAttributes extends DefaultErrorAttributes {
     private static final String VALIDATION_ERROR = "Validation Error";
     private static final String BUSINESSVIOLATION_ERROR = "Business Rule Violation";
     private static final String JWT_ERROR = "JWT Validation Error";
+    private static final String ACCESS_DENIED_ERROR = "Access Denied";
 
 
 
@@ -42,6 +45,10 @@ public class GlobalErrorAttributes extends DefaultErrorAttributes {
         } else if (error instanceof JwtException) {
             errorAttributes.put(ATTRIBUTE_ERROR, JWT_ERROR);
             errorAttributes.put(ATTRIBUTE_STATUS, HttpStatus.UNAUTHORIZED.value());
+        } else if (error instanceof AuthorizationException) {
+            errorAttributes.put(ATTRIBUTE_ERROR, ACCESS_DENIED_ERROR);
+            errorAttributes.put(ATTRIBUTE_STATUS, HttpStatus.FORBIDDEN.value());
+            
         } else {
             errorAttributes.put(ATTRIBUTE_ERROR, "Internal Server Error");
             errorAttributes.put(ATTRIBUTE_STATUS, HttpStatus.INTERNAL_SERVER_ERROR.value());
