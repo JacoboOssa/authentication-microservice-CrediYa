@@ -2,6 +2,8 @@ package co.com.crediya.r2dbc.util;
 
 import co.com.crediya.r2dbc.entity.UserEntity;
 
+import java.math.BigDecimal;
+
 public class UserEntityUtil {
     public static UserEntity userEntity(){
         return UserEntity.builder()
@@ -14,7 +16,7 @@ public class UserEntityUtil {
                 .email("jon@gmail.com")
                 .password("password")
                 .identificationNumber("123456789")
-                .baseSalary(3000000.0)
+                .baseSalary(BigDecimal.valueOf(3000000.0))
                 .rolId("2")
                 .build();
     }

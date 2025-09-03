@@ -2,6 +2,8 @@ package co.com.crediya.usecase.util;
 
 import co.com.crediya.model.user.User;
 
+import java.math.BigDecimal;
+
 public class UserUtil {
     public static User user(){
         return User.builder()
@@ -14,7 +16,7 @@ public class UserUtil {
                 .email("ac@gmail.com")
                 .password("securePassword")
                 .identificationNumber("ID123456")
-                .baseSalary(50000.0)
+                .baseSalary(BigDecimal.valueOf(50000.0))
                 .role(RolUtil.clientRol())
                 .build();
     }
@@ -30,7 +32,7 @@ public class UserUtil {
                 .email("madrid@gmail.com")
                 .password("securePassword")
                 .identificationNumber("110823")
-                .baseSalary(45000.0)
+                .baseSalary(BigDecimal.valueOf(45000.0))
                 .role(RolUtil.adminRol())
                 .build();
     }

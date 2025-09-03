@@ -11,6 +11,7 @@ import co.com.crediya.api.mapper.UserDTOMapper;
 import co.com.crediya.api.util.LoginDTOUtil;
 import co.com.crediya.api.util.UserUtil;
 import co.com.crediya.api.validator.UserValidator;
+import co.com.crediya.model.exceptions.AuthorizationException;
 import co.com.crediya.model.exceptions.BusinessException;
 import co.com.crediya.model.exceptions.JwtException;
 import co.com.crediya.model.rol.Rol;
@@ -35,6 +36,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,7 +45,7 @@ import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {RouterRest.class, Handler.class})
 @EnableConfigurationProperties(UserPath.class)
-@TestPropertySource(properties = {"routes.paths.save-user=/api/v1/usuarios", "routes.paths.get-all-users=/api/v1/usuarios", "routes.paths.get-user-email-by-id-number=/api/v1/usuarios/{identificationNumber}", "routes.paths.log-in=/auth/api/v1/login", "routes.paths.validate=/auth/api/v1/validate"})
+@TestPropertySource(properties = {"routes.paths.save-user=/api/v1/usuarios", "routes.paths.get-all-users=/api/v1/usuarios", "routes.paths.get-user-email-by-id-number=/api/v1/usuarios/{identificationNumber}", "routes.paths.log-in=/auth/api/v1/login", "routes.paths.validate=/auth/api/v1/validate{jwt}", "routes.paths.get-user-by-email=/api/v1/usuarios/email/{email}"})
 @WebFluxTest
 @Import({GlobalExceptionHandler.class, GlobalErrorAttributes.class, TestSecurityConfig.class})
 class RouterRestTest {
@@ -87,7 +89,7 @@ class RouterRestTest {
             .address("123 Main St")
             .phoneNumber("555-1234")
             .birthDate("1990-01-01")
-            .baseSalary(5000000.0)
+            .baseSalary(BigDecimal.valueOf(5000000.0))
             .role(roleDTO).build();
 
 
@@ -96,6 +98,7 @@ class RouterRestTest {
     private final String getAllUserPath = "/api/v1/usuarios";
     private final String logInPath = "/auth/api/v1/login";
     private final String validateTokenPath = "/auth/api/v1/validate";
+    private final String getUserByEmail = "/api/v1/usuarios/email/{email}";
 
     private final CreateUserRequestDTO createUserRequestDTO = CreateUserRequestDTO.builder()
             .name("Jacobo")
@@ -105,7 +108,7 @@ class RouterRestTest {
             .address("123 Main St")
             .phoneNumber("555-1234")
             .birthDate("1990-01-01")
-            .baseSalary(5000000.0)
+            .baseSalary(BigDecimal.valueOf(5000000.0))
             .roleId("90f41a3f-3ae3-4b0b-8096-9b73cb6b2037")
             .build();
 
@@ -117,7 +120,7 @@ class RouterRestTest {
             .address("123 Main St")
             .phoneNumber("555-1234")
             .birthDate("1990-01-01")
-            .baseSalary(5000000.0)
+            .baseSalary(BigDecimal.valueOf(5000000.0))
             .roleId("90f41a3f-3ae3-4b0b-8096-9b73cb6b2037")
             .build();
 
@@ -138,7 +141,7 @@ class RouterRestTest {
         user.setPhoneNumber("555-1234");
         user.setEmail("fern@gmail.com");
         user.setIdentificationNumber("123456789");
-        user.setBaseSalary(50000.0);
+        user.setBaseSalary(BigDecimal.valueOf(50000.0));
         user.setRole(rol);
     }
 
@@ -312,7 +315,7 @@ class RouterRestTest {
     void mustValidateTokenSuccessfully(){
         String token = "Bearer eyJhbGciOiJIUzI1NiJ9...";
 
-        when(validateTokenUseCase.validateToken("eyJhbGciOiJIUzI1NiJ9...")).thenReturn(Mono.just(UserUtil.user1()));
+        when(validateTokenUseCase.validateToken(any(String.class))).thenReturn(Mono.just(UserUtil.user1()));
 
         webTestClient.get()
                 .uri(validateTokenPath) // tu endpoint
@@ -328,7 +331,7 @@ class RouterRestTest {
     void mustFailWhenInvalidToken(){
         String token = "Bearer InvalidToken";
 
-        when(validateTokenUseCase.validateToken("InvalidToken"))
+        when(validateTokenUseCase.validateToken(any(String.class)))
                 .thenReturn(Mono.error(new JwtException(JwtException.INVALID_TOKEN)));
 
         webTestClient.get()
@@ -342,8 +345,42 @@ class RouterRestTest {
                 .jsonPath("$.path").isEqualTo("/auth/api/v1/validate");
     }
 
+    @Test
+    void mustFailWhenUserHasNoPermissions(){
+        String token = "Bearer InvalidToken";
 
+        when(validateTokenUseCase.validateToken(any(String.class)))
+                .thenReturn(Mono.error(new AuthorizationException(AuthorizationException.FORBIDDEN)));
 
+        webTestClient.get()
+                .uri(validateTokenPath)
+                .header("Authorization", token)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(403)
+                .jsonPath("$.path").isEqualTo("/auth/api/v1/validate");
+
+    }
+
+    @Test
+    void mustRetrieveUserByEmail() {
+        String token = "Bearer InvalidToken";
+
+        when(validateTokenUseCase.validateToken(any(String.class))).thenReturn(Mono.just(UserUtil.user1()));
+        when(userUseCase.getUserByEmail(any(String.class))).thenReturn(Mono.just(UserUtil.user1()));
+        when(userDTOMapper.toDto(any(User.class))).thenReturn(UserUtil.userResponseDTOUser1());
+
+        webTestClient.get()
+                .uri(getUserByEmail, UserUtil.user1().getEmail())
+                .header("Authorization", token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.email").isEqualTo(UserUtil.user1().getEmail())
+                .jsonPath("$.identificationNumber").isEqualTo(UserUtil.user1().getIdentificationNumber());
+
+    }
 
 
 

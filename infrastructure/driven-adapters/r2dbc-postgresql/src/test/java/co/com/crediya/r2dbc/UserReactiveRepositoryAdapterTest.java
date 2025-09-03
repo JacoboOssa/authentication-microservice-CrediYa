@@ -3,6 +3,7 @@ package co.com.crediya.r2dbc;
 import co.com.crediya.model.rol.Rol;
 import co.com.crediya.model.user.User;
 import co.com.crediya.r2dbc.entity.UserEntity;
+import co.com.crediya.r2dbc.helper.UserDomainMapper;
 import co.com.crediya.r2dbc.helper.UserEntityMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +12,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -27,6 +30,9 @@ class UserReactiveRepositoryAdapterTest {
     @Mock
     UserEntityMapper userEntityMapper;
 
+    @Mock
+    UserDomainMapper userDomainMapper;
+
 
     private final UserEntity userEntity = UserEntity.builder()
             .id("1")
@@ -37,7 +43,7 @@ class UserReactiveRepositoryAdapterTest {
             .phoneNumber("555-1234")
             .email("jaco@gmail.com")
             .identificationNumber("123456789")
-            .baseSalary(50000.0)
+            .baseSalary(BigDecimal.valueOf(50000.0))
             .rolId("90f41a3f-3ae3-4b0b-8096-9b73cb6b2037")
             .build();
 
@@ -58,7 +64,7 @@ class UserReactiveRepositoryAdapterTest {
         user.setPhoneNumber("555-1234");
         user.setEmail("jaco@gmail.com");
         user.setIdentificationNumber("123456789");
-        user.setBaseSalary(50000.0);
+        user.setBaseSalary(BigDecimal.valueOf(50000.0));
         user.setRole(rol);
     }
 
@@ -167,6 +173,16 @@ class UserReactiveRepositoryAdapterTest {
                 .verify();
     }
 
+    @Test
+    void mustFindUserByEmail() {
+        String email = "caro@gmail.com";
 
+        when(repository.findByEmail(email)).thenReturn(Mono.just(userEntity));
+        when(userDomainMapper.toDomain(userEntity)).thenReturn(Mono.just(user));
+
+        StepVerifier.create(repositoryAdapter.findByEmail(email))
+                .expectNext(user)
+                .verifyComplete();
+    }
 
 }

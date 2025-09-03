@@ -26,9 +26,11 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
+
 import static org.mockito.Mockito.when;
 
-@TestPropertySource(properties = {"routes.paths.save-user=/api/v1/usuarios", "routes.paths.get-all-users=/api/v1/usuarios", "routes.paths.get-user-email-by-id-number=/api/v1/usuarios/{identificationNumber}", "routes.paths.log-in=/auth/api/v1/login", "routes.paths.validate=/auth/api/v1/validate"})
+@TestPropertySource(properties = {"routes.paths.save-user=/api/v1/usuarios", "routes.paths.get-all-users=/api/v1/usuarios", "routes.paths.get-user-email-by-id-number=/api/v1/usuarios/{identificationNumber}", "routes.paths.log-in=/auth/api/v1/login", "routes.paths.validate=/auth/api/v1/validate{jwt}", "routes.paths.get-user-by-email=/api/v1/usuarios/email/{email}"})
 @EnableConfigurationProperties(UserPath.class)
 @ContextConfiguration(classes = {RouterRest.class, Handler.class})
 @WebFluxTest
@@ -78,7 +80,7 @@ class ConfigTest {
         user.setPhoneNumber("555-1234");
         user.setEmail("fern@gmail.com");
         user.setIdentificationNumber("123456789");
-        user.setBaseSalary(50000.0);
+        user.setBaseSalary(BigDecimal.valueOf(50000.0));
         user.setRole(rol);
     }
 
@@ -97,7 +99,7 @@ class ConfigTest {
             .address("123 Main St")
             .phoneNumber("555-1234")
             .birthDate("1990-01-01")
-            .baseSalary(5000000.0)
+            .baseSalary(BigDecimal.valueOf(5000000.0))
             .role(roleDTO)
             .build();
 

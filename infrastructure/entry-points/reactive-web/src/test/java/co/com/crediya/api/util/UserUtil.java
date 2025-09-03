@@ -3,6 +3,8 @@ package co.com.crediya.api.util;
 import co.com.crediya.api.dto.response.UserResponseDTO;
 import co.com.crediya.model.user.User;
 
+import java.math.BigDecimal;
+
 public class UserUtil {
     public static User user1(){
         return User.builder()
@@ -15,7 +17,7 @@ public class UserUtil {
                 .email("mesi@gmail.com")
                 .password("1234")
                 .identificationNumber("819347912")
-                .baseSalary(1200000.0)
+                .baseSalary(BigDecimal.valueOf(1200000.0))
                 .role(RolUtil.rolAdmin())
                 .build();
     }
@@ -31,7 +33,7 @@ public class UserUtil {
                 .email("bichi@gmail.com")
                 .password("1234")
                 .identificationNumber("281039")
-                .baseSalary(1200000.0)
+                .baseSalary(BigDecimal.valueOf(1200000.0))
                 .role(RolUtil.rolClient())
                 .build();
     }
@@ -46,7 +48,7 @@ public class UserUtil {
                 .phoneNumber("12312412")
                 .email("mesi@gmail.com")
                 .identificationNumber("819347912")
-                .baseSalary(1200000.0)
+                .baseSalary(BigDecimal.valueOf(1200000.0))
                 .role(RolUtil.roleAdminDTO())
                 .build();
     }
@@ -61,7 +63,7 @@ public class UserUtil {
                 .phoneNumber("909090")
                 .email("bichi@gmail.com")
                 .identificationNumber("281039")
-                .baseSalary(1200000.0)
+                .baseSalary(BigDecimal.valueOf(1200000.0))
                 .role(RolUtil.roleClientDTO())
                 .build();
 

@@ -16,6 +16,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.math.BigDecimal;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
@@ -54,7 +56,7 @@ class UserUseCaseTest {
         user.setPhoneNumber("4324");
         user.setEmail("jon@gmail.com");
         user.setIdentificationNumber("123456789");
-        user.setBaseSalary(50000.0);
+        user.setBaseSalary(BigDecimal.valueOf(50000.0));
         user.setRole(rol1);
 
         user2 = new User();
@@ -66,7 +68,7 @@ class UserUseCaseTest {
         user2.setPhoneNumber("5678");
         user2.setEmail("as@gmail.com");
         user2.setIdentificationNumber("987654321");
-        user2.setBaseSalary(60000.0);
+        user2.setBaseSalary(BigDecimal.valueOf(60000.0));
         user2.setRole(rol2);
 
         user3 = new User();
@@ -78,7 +80,7 @@ class UserUseCaseTest {
         user3.setPhoneNumber("9101");
         user3.setEmail("jaco@gmail.com");
         user3.setIdentificationNumber("1107836154");
-        user3.setBaseSalary(70000.0);
+        user3.setBaseSalary(BigDecimal.valueOf(70000.0));
         user3.setRole(rol1);
 
 
@@ -173,6 +175,33 @@ class UserUseCaseTest {
                 .expectErrorMatches(throwable ->
                         throwable instanceof BusinessException &&
                                 throwable.getMessage().contains(BusinessException.USER_WITH_IDENTIFICATION_NOT_FOUND + "0000000000"))
+                .verify();
+    }
+
+    @Test
+    void mustRetrieveUserByEmail() {
+        String email = "eliza@gmail.com";
+
+        when(userRepository.findByEmail(email)).thenReturn(Mono.just(user));
+        when(rolRepository.findById(user.getRole().getId())).thenReturn(Mono.just(rol1));
+
+        StepVerifier.create(userUseCase.getUserByEmail(email))
+                .expectNextMatches(u ->
+                        u.getEmail().equals(user.getEmail()) &&
+                                u.getRole().equals(rol1)
+                )
+                .verifyComplete();
+    }
+
+    @Test
+    void mustFailWhenUserNotFound() {
+        String email = "eliza@gmail.com";
+        when(userRepository.findByEmail(email)).thenReturn(Mono.empty());
+
+        StepVerifier.create(userUseCase.getUserByEmail(email))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof BusinessException &&
+                                throwable.getMessage().contains(BusinessException.USER_NOT_FOUND + email))
                 .verify();
     }
 
