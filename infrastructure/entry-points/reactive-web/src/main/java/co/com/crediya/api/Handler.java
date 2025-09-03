@@ -6,7 +6,6 @@ import co.com.crediya.api.dto.response.UserResponseDTO;
 import co.com.crediya.api.dto.response.ValidatedTokenDTO;
 import co.com.crediya.api.mapper.UserDTOMapper;
 import co.com.crediya.api.validator.UserValidator;
-import co.com.crediya.model.exceptions.JwtException;
 import co.com.crediya.transaction.TransactionalAdapter;
 import co.com.crediya.usecase.login.LogInUseCase;
 import co.com.crediya.usecase.user.UserUseCase;
