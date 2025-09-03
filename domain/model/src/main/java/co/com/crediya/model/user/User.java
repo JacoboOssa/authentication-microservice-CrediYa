@@ -3,6 +3,8 @@ package co.com.crediya.model.user;
 import co.com.crediya.model.rol.Rol;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,6 +21,6 @@ public class User {
     private String email;
     private String password;
     private String identificationNumber;
-    private Double baseSalary;
+    private BigDecimal baseSalary;
     private Rol role;
 }

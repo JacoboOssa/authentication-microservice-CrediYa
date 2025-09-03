@@ -5,6 +5,8 @@ import jakarta.validation.constraints.*;
 import lombok.Builder;
 import org.hibernate.validator.constraints.UUID;
 
+import java.math.BigDecimal;
+
 
 @Builder
 public record CreateUserRequestDTO(
@@ -28,7 +30,7 @@ public record CreateUserRequestDTO(
         @NotNull(message = "Base salary is required")
         @Min(value = 0, message = "Base salary must be positive")
         @Max(value = 15000000, message = "Base salary must be less than or equal to 15,000,000")
-        Double baseSalary,
+        BigDecimal baseSalary,
         @UUID(message = "Role ID must be a valid UUID")
         @NotBlank(message = "Role ID is required")
         String roleId
