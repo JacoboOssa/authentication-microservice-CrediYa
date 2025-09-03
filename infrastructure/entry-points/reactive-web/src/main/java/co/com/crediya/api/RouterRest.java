@@ -126,6 +126,22 @@ public class RouterRest {
                                     )
                             }
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/v1/usuarios/{email}",
+                    produces = MediaType.APPLICATION_JSON_VALUE,
+                    method = RequestMethod.GET,
+                    beanClass = Handler.class,
+                    beanMethod = "retrieveUserByEmail",
+                    operation = @Operation(
+                            summary = "Get User by Email",
+                            operationId = "retrieveUserByEmail",
+                            responses = @ApiResponse(
+                                    responseCode = "200",
+                                    description = "Successful operation",
+                                    content = @Content(schema = @Schema(implementation = UserResponseDTO.class))
+                            )
+                    )
             )
 
     })
@@ -134,6 +150,7 @@ public class RouterRest {
                 .andRoute(GET(userPath.getGetAllUsers()), handler::getAllUsers)
                 .andRoute(GET(userPath.getGetUserEmailByIdNumber()), handler::getEmailByIdentificationNumber)
                 .andRoute(POST(userPath.getLogIn()), handler::logIn)
-                .andRoute(GET(userPath.getValidate()),handler::validateToken);
+                .andRoute(GET(userPath.getValidate()),handler::validateToken)
+                .andRoute(GET(userPath.getGetUserByEmail()), handler::retrieveUserByEmail);
     }
 }

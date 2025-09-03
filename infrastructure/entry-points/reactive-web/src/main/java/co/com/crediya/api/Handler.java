@@ -107,4 +107,18 @@ public class Handler {
 
     }
 
+    @PreAuthorize("hasAnyRole('ASESOR', 'CLIENT')")
+    public Mono<ServerResponse> retrieveUserByEmail(ServerRequest serverRequest) {
+        String email = serverRequest.pathVariable("email");
+        log.info("Received request to get user by email: {}", email);
+
+        return userUseCase.getUserByEmail(email)
+                .map(userDTOMapper::toDto)
+                .flatMap(userDto -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(userDto))
+                .doOnSuccess(response -> log.info("Successfully retrieved user for email: {}", email))
+                .doOnError(error -> log.error("Error retrieving user for email {}: {}", email, error.getMessage()));
+    }
+
 }

@@ -15,4 +15,5 @@ public class UserPath {
     private String getUserEmailByIdNumber;
     private String logIn;
     private String validate;
+    private String getUserByEmail;
 }

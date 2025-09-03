@@ -67,4 +67,18 @@ public class UserUseCase {
                         BusinessException.USER_WITH_IDENTIFICATION_NOT_FOUND + identificationNumber
                 )));
     }
+
+    public Mono<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .switchIfEmpty(Mono.error(new BusinessException(
+                        BusinessException.USER_NOT_FOUND + email
+                )))
+                .flatMap(user ->
+                        rolRepository.findById(user.getRole().getId())
+                                .map(role -> {
+                                    user.setRole(role);
+                                    return user;
+                                })
+                );
+    }
 }
