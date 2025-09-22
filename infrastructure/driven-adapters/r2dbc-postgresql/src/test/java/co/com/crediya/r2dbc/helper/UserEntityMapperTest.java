@@ -5,6 +5,9 @@ import co.com.crediya.model.user.User;
 import co.com.crediya.r2dbc.entity.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -28,7 +31,7 @@ public class UserEntityMapperTest {
         user.setBirthDate("1990-01-01");
         user.setPhoneNumber("555-1234");
         user.setIdentificationNumber("ID123456");
-        user.setBaseSalary(50000.0);
+        user.setBaseSalary(BigDecimal.valueOf(50000.0));
         user.setRole(role);
 
         UserEntity userEntity = userEntityMapper.toEntity(user);
@@ -49,7 +52,7 @@ public class UserEntityMapperTest {
         userEntity.setBirthDate("1990-01-01");
         userEntity.setPhoneNumber("555-1234");
         userEntity.setIdentificationNumber(("ID123456"));
-        userEntity.setBaseSalary(50000.0);
+        userEntity.setBaseSalary(BigDecimal.valueOf(50000.0));
         userEntity.setRolId("1");
 
         User user = userEntityMapper.toDomain(userEntity);

@@ -1,14 +1,19 @@
 package co.com.crediya.api;
 
 import co.com.crediya.api.dto.request.CreateUserRequestDTO;
+import co.com.crediya.api.dto.request.LogInDTO;
 import co.com.crediya.api.dto.response.UserResponseDTO;
+import co.com.crediya.api.dto.response.ValidatedTokenDTO;
 import co.com.crediya.api.mapper.UserDTOMapper;
 import co.com.crediya.api.validator.UserValidator;
 import co.com.crediya.transaction.TransactionalAdapter;
+import co.com.crediya.usecase.login.LogInUseCase;
 import co.com.crediya.usecase.user.UserUseCase;
+import co.com.crediya.usecase.validatetoken.ValidateTokenUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -21,12 +26,15 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class Handler {
     private final UserUseCase userUseCase;
+    private final LogInUseCase logInUseCase;
+    private final ValidateTokenUseCase validateTokenUseCase;
     private final UserDTOMapper userDTOMapper;
     private final UserValidator userValidator;
     private final TransactionalAdapter transactionalAdapter;
 
 
 
+    @PreAuthorize("hasAnyRole('ASESOR','ADMIN')")
     public Mono<ServerResponse> saveUser(ServerRequest serverRequest) {
         log.info("Received request to create user");
         return transactionalAdapter.executeInTransaction(
@@ -43,6 +51,7 @@ public class Handler {
         );
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<ServerResponse> getAllUsers(ServerRequest serverRequest) {
         log.info("Received request to get all users");
         return ServerResponse.ok()
@@ -52,6 +61,7 @@ public class Handler {
                 .doOnError(error -> log.error("Error retrieving users: {}", error.getMessage()));
     }
 
+    @PreAuthorize("hasAnyRole('ASESOR','ADMIN','CLIENT')")
     public Mono<ServerResponse> getEmailByIdentificationNumber(ServerRequest serverRequest) {
         String identificationNumber = serverRequest.pathVariable("identificationNumber");
         log.info("Received request to get email by identification number: {}", identificationNumber);
@@ -64,5 +74,51 @@ public class Handler {
                 .doOnError(error -> log.error("Error retrieving email for identification number {}: {}", identificationNumber, error.getMessage()));
     }
 
+
+    public Mono<ServerResponse> logIn(ServerRequest serverRequest) {
+        log.info("Received request to log in");
+        return serverRequest.bodyToMono(LogInDTO.class)
+                .flatMap(body -> {
+                    String email = body.email();
+                    String password =body.password();
+                    return logInUseCase.logIn(email, password);
+                })
+                .flatMap(token -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(Map.of("token", token)))
+                .doOnSuccess(response -> log.info("User logged in successfully"))
+                .doOnError(error -> log.error("Error logging in user: {}", error.getMessage()));
+    }
+
+    public Mono<ServerResponse> validateToken(ServerRequest serverRequest) {
+        String jwt = serverRequest.pathVariable("jwt");
+        log.info("Received request to validate token: {}", jwt);
+        return validateTokenUseCase.validateToken(jwt)
+                .doOnSuccess(user -> log.info("Token válido para " + user.getEmail()))
+                .doOnError(e -> log.error("Error validando token: " + e.getMessage()))
+                .flatMap(user -> ServerResponse.ok()
+                        .bodyValue(
+                                ValidatedTokenDTO.builder()
+                                        .email(user.getEmail())
+                                        .rol(user.getRole().getName())
+                                        .build()
+                        )
+                );
+
+    }
+
+    @PreAuthorize("hasAnyRole('ASESOR', 'CLIENT')")
+    public Mono<ServerResponse> retrieveUserByEmail(ServerRequest serverRequest) {
+        String email = serverRequest.pathVariable("email");
+        log.info("Received request to get user by email: {}", email);
+
+        return userUseCase.getUserByEmail(email)
+                .map(userDTOMapper::toDto)
+                .flatMap(userDto -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(userDto))
+                .doOnSuccess(response -> log.info("Successfully retrieved user for email: {}", email))
+                .doOnError(error -> log.error("Error retrieving user for email {}: {}", email, error.getMessage()));
+    }
 
 }

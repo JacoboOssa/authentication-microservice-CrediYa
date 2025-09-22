@@ -10,4 +10,5 @@ public interface UserRepository {
     Mono<Boolean> existByIdentificationNumber(String identificationNumber);
     Flux<User> findAll();
     Mono<String> getEmailByIdentificationNumber(String identificationNumber);
+    Mono<User> findByEmail(String email);
 }

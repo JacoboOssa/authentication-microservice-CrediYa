@@ -1,9 +1,12 @@
 package co.com.crediya.api.exceptionhandler;
 
+import co.com.crediya.model.exceptions.AuthorizationException;
+import org.springframework.security.access.AccessDeniedException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import co.com.crediya.model.exceptions.BusinessException;
+import co.com.crediya.model.exceptions.JwtException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.reactive.error.DefaultErrorAttributes;
@@ -17,6 +20,11 @@ public class GlobalErrorAttributes extends DefaultErrorAttributes {
 
     private static final String ATTRIBUTE_ERROR = "error";
     private static final String ATTRIBUTE_STATUS = "status";
+    private static final String VALIDATION_ERROR = "Validation Error";
+    private static final String BUSINESSVIOLATION_ERROR = "Business Rule Violation";
+    private static final String JWT_ERROR = "JWT Validation Error";
+    private static final String ACCESS_DENIED_ERROR = "Access Denied";
+
 
 
     @Override
@@ -29,11 +37,18 @@ public class GlobalErrorAttributes extends DefaultErrorAttributes {
 
 
         if (error instanceof ConstraintViolationException) {
-            errorAttributes.put(ATTRIBUTE_ERROR, "Validation Error");
+            errorAttributes.put(ATTRIBUTE_ERROR, VALIDATION_ERROR);
             errorAttributes.put(ATTRIBUTE_STATUS, HttpStatus.BAD_REQUEST.value());
         } else if (error instanceof BusinessException) {
-            errorAttributes.put(ATTRIBUTE_ERROR, "Business Rule Violation");
+            errorAttributes.put(ATTRIBUTE_ERROR, BUSINESSVIOLATION_ERROR);
             errorAttributes.put(ATTRIBUTE_STATUS, HttpStatus.CONFLICT.value());
+        } else if (error instanceof JwtException) {
+            errorAttributes.put(ATTRIBUTE_ERROR, JWT_ERROR);
+            errorAttributes.put(ATTRIBUTE_STATUS, HttpStatus.UNAUTHORIZED.value());
+        } else if (error instanceof AuthorizationException) {
+            errorAttributes.put(ATTRIBUTE_ERROR, ACCESS_DENIED_ERROR);
+            errorAttributes.put(ATTRIBUTE_STATUS, HttpStatus.FORBIDDEN.value());
+            
         } else {
             errorAttributes.put(ATTRIBUTE_ERROR, "Internal Server Error");
             errorAttributes.put(ATTRIBUTE_STATUS, HttpStatus.INTERNAL_SERVER_ERROR.value());

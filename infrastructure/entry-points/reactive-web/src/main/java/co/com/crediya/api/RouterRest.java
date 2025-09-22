@@ -2,7 +2,11 @@ package co.com.crediya.api;
 
 import co.com.crediya.api.config.UserPath;
 import co.com.crediya.api.dto.request.CreateUserRequestDTO;
+import co.com.crediya.api.dto.request.LogInDTO;
+import co.com.crediya.api.dto.response.ErrorResponseDTO;
+import co.com.crediya.api.dto.response.TokenDTO;
 import co.com.crediya.api.dto.response.UserResponseDTO;
+import co.com.crediya.api.dto.response.ValidatedTokenDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -80,11 +84,73 @@ public class RouterRest {
                                     content = @Content(schema = @Schema(implementation = String.class))
                             )
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/v1/usuarios/login",
+                    produces = MediaType.APPLICATION_JSON_VALUE,
+                    method = RequestMethod.POST,
+                    beanClass = Handler.class,
+                    beanMethod = "logIn",
+                    operation = @Operation(
+                            summary = "User Log In",
+                            operationId = "logIn",
+                            requestBody = @RequestBody(
+                                    content = @Content(schema = @Schema(implementation = LogInDTO.class))
+                            ),
+                            responses = @ApiResponse(
+                                    responseCode = "200",
+                                    description = "Successful operation",
+                                    content = @Content(schema = @Schema(implementation = TokenDTO.class))
+                            )
+                    )
+            ),
+            @RouterOperation(
+                    path = "/auth/api/v1/validate",
+                    produces = MediaType.APPLICATION_JSON_VALUE,
+                    method = RequestMethod.GET,
+                    beanClass = Handler.class,
+                    beanMethod = "validateToken",
+                    operation = @Operation(
+                            summary = "Validate token (JWT)",
+                            operationId = "validateToken",
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Token is valid",
+                                            content = @Content(schema = @Schema(implementation = ValidatedTokenDTO.class))
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "401",
+                                            description = "Authorization header is empty or not bearer token",
+                                            content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))
+                                    )
+                            }
+                    )
+            ),
+            @RouterOperation(
+                    path = "/api/v1/usuarios/{email}",
+                    produces = MediaType.APPLICATION_JSON_VALUE,
+                    method = RequestMethod.GET,
+                    beanClass = Handler.class,
+                    beanMethod = "retrieveUserByEmail",
+                    operation = @Operation(
+                            summary = "Get User by Email",
+                            operationId = "retrieveUserByEmail",
+                            responses = @ApiResponse(
+                                    responseCode = "200",
+                                    description = "Successful operation",
+                                    content = @Content(schema = @Schema(implementation = UserResponseDTO.class))
+                            )
+                    )
             )
+
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(POST(userPath.getSaveUser()), handler::saveUser)
                 .andRoute(GET(userPath.getGetAllUsers()), handler::getAllUsers)
-                .andRoute(GET(userPath.getGetUserEmailByIdNumber()), handler::getEmailByIdentificationNumber);
+                .andRoute(GET(userPath.getGetUserEmailByIdNumber()), handler::getEmailByIdentificationNumber)
+                .andRoute(POST(userPath.getLogIn()), handler::logIn)
+                .andRoute(GET(userPath.getValidate()),handler::validateToken)
+                .andRoute(GET(userPath.getGetUserByEmail()), handler::retrieveUserByEmail);
     }
 }

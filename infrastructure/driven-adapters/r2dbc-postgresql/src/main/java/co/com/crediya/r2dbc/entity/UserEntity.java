@@ -6,6 +6,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.math.BigDecimal;
+
 @Table(name = "users")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,10 +30,12 @@ public class UserEntity {
     private String phoneNumber;
     @Column("email")
     private String email;
+    @Column("password")
+    private String password;
     @Column("identification_number")
     private String identificationNumber;
     @Column("base_salary")
-    private Double baseSalary;
+    private BigDecimal baseSalary;
     @Column("rol_id")
     private String rolId;
 }

@@ -13,12 +13,12 @@ spring:
     include: null
 adapters:
   r2dbc:
-    host: "localhost"
-    port: 5432
-    database: "postgres"
-    schema: "public"
-    username: "postgres"
-    password: "postgres123"
+    host: ${DB_HOST:localhost}
+    port: ${DB_PORT:5432}
+    database: ${DB_NAME:postgres}
+    schema: ${DB_SCHEMA:public}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres123}
 management:
   endpoints:
     web:
@@ -36,3 +36,10 @@ routes:
     saveUser: "/api/v1/usuarios"
     get-all-users: "/api/v1/usuarios"
     get-user-email-by-id-number: "/api/v1/usuarios/{identificationNumber}"
+    log-in: "/auth/api/v1/login"
+    validate: "/auth/api/v1/validate/{jwt}"
+    get-user-by-email: "/api/v1/usuarios/email/{email}"
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION}

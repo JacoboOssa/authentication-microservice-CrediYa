@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.test.StepVerifier;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 
 import static org.mockito.Mockito.when;
@@ -29,7 +30,7 @@ class UserValidatorTest {
             .phoneNumber("555-1234")
             .identificationNumber("ID123456")
             .email("jon@gmail.com")
-            .baseSalary(5000000.0)
+            .baseSalary(BigDecimal.valueOf(200000))
             .roleId("role-uuid-1234")
             .build();
 

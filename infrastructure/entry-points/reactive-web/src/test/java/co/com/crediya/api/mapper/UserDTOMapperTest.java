@@ -5,12 +5,13 @@ import co.com.crediya.api.dto.response.UserResponseDTO;
 import co.com.crediya.model.rol.Rol;
 import co.com.crediya.model.user.User;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
+
+import java.math.BigDecimal;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class UserDTOMapperTest {
+class UserDTOMapperTest {
 
     private final UserDTOMapper userDTOMapper = Mappers.getMapper(UserDTOMapper.class);
 
@@ -22,7 +23,7 @@ public class UserDTOMapperTest {
             .phoneNumber("555-1234")
             .identificationNumber("ID123456")
             .email("jon@gmail.com")
-            .baseSalary(5000000.0)
+            .baseSalary(BigDecimal.valueOf(5000000.0))
             .roleId("role-uuid-1234")
             .build();
 
@@ -41,7 +42,7 @@ public class UserDTOMapperTest {
         user.setPhoneNumber("555-1234");
         user.setIdentificationNumber("ID123456");
         user.setEmail("jon@gmail.com");
-        user.setBaseSalary(5000000.0);
+        user.setBaseSalary(BigDecimal.valueOf(000000.0));
         user.setRole(rol);
 
         User mappedUser = userDTOMapper.toDomain(createUserRequestDTO);
@@ -68,7 +69,7 @@ public class UserDTOMapperTest {
         user.setPhoneNumber("555-1234");
         user.setIdentificationNumber("ID123456");
         user.setEmail("jon@gmail.com");
-        user.setBaseSalary(5000000.0);
+        user.setBaseSalary(BigDecimal.valueOf(000000.0));
         user.setRole(rol);
 
         UserResponseDTO userResponseDTO = userDTOMapper.toDto(user);

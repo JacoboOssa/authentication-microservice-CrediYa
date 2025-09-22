@@ -5,11 +5,14 @@ import co.com.crediya.api.RouterRest;
 import co.com.crediya.api.dto.response.RoleDTO;
 import co.com.crediya.api.dto.response.UserResponseDTO;
 import co.com.crediya.api.mapper.UserDTOMapper;
+import co.com.crediya.api.util.LoginDTOUtil;
 import co.com.crediya.api.validator.UserValidator;
 import co.com.crediya.model.rol.Rol;
 import co.com.crediya.model.user.User;
 import co.com.crediya.transaction.TransactionalAdapter;
+import co.com.crediya.usecase.login.LogInUseCase;
 import co.com.crediya.usecase.user.UserUseCase;
+import co.com.crediya.usecase.validatetoken.ValidateTokenUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,18 +24,28 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.math.BigDecimal;
+
 import static org.mockito.Mockito.when;
 
-@TestPropertySource(properties = {"routes.paths.save-user=/api/v1/usuarios", "routes.paths.get-all-users=/api/v1/usuarios", "routes.paths.get-user-email-by-id-number=/api/v1/usuarios/{identificationNumber}"})
+@TestPropertySource(properties = {"routes.paths.save-user=/api/v1/usuarios", "routes.paths.get-all-users=/api/v1/usuarios", "routes.paths.get-user-email-by-id-number=/api/v1/usuarios/{identificationNumber}", "routes.paths.log-in=/auth/api/v1/login", "routes.paths.validate=/auth/api/v1/validate{jwt}", "routes.paths.get-user-by-email=/api/v1/usuarios/email/{email}"})
 @EnableConfigurationProperties(UserPath.class)
 @ContextConfiguration(classes = {RouterRest.class, Handler.class})
 @WebFluxTest
-@Import({CorsConfig.class, SecurityHeadersConfig.class})
+@Import({CorsConfig.class, SecurityHeadersConfig.class, TestSecurityConfig.class})
 class ConfigTest {
 
 
     @MockitoBean
     private UserUseCase userUseCase;
+
+    @MockitoBean
+    private LogInUseCase logInUseCase;
+
+    @MockitoBean
+    private ValidateTokenUseCase validateTokenUseCase;
 
     @MockitoBean
     private UserDTOMapper userDTOMapper;
@@ -67,7 +80,7 @@ class ConfigTest {
         user.setPhoneNumber("555-1234");
         user.setEmail("fern@gmail.com");
         user.setIdentificationNumber("123456789");
-        user.setBaseSalary(50000.0);
+        user.setBaseSalary(BigDecimal.valueOf(50000.0));
         user.setRole(rol);
     }
 
@@ -86,7 +99,7 @@ class ConfigTest {
             .address("123 Main St")
             .phoneNumber("555-1234")
             .birthDate("1990-01-01")
-            .baseSalary(5000000.0)
+            .baseSalary(BigDecimal.valueOf(5000000.0))
             .role(roleDTO)
             .build();
 
@@ -97,14 +110,18 @@ class ConfigTest {
 
         when(userDTOMapper.toDto(user)).thenReturn(userResponseDTO);
 
+        when(logInUseCase.logIn("ferna@gmail.com", "Chacal1125*"))
+                .thenReturn(Mono.just("fake-jwt-token"));
+
     }
 
 
     @Test
     void corsConfigurationShouldAllowOrigins() {
-        String getAllUsersPath = "/api/v1/usuarios";
-        webTestClient.get()
-                .uri(getAllUsersPath)
+        String logInPath = "/auth/api/v1/login";
+        webTestClient.post()
+                .uri(logInPath)
+                .bodyValue(LoginDTOUtil.logInDTO())
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().valueEquals("Content-Security-Policy",

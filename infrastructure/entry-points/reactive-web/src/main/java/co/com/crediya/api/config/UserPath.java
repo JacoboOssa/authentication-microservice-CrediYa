@@ -13,4 +13,7 @@ public class UserPath {
     private String saveUser;
     private String getAllUsers;
     private String getUserEmailByIdNumber;
+    private String logIn;
+    private String validate;
+    private String getUserByEmail;
 }
