@@ -8,7 +8,7 @@ WORKDIR /app
 COPY applications/app-service/build/libs/PowerUpCrediYa.jar /app/PowerUpCrediYa.jar
 
 # Exponer el puerto de la aplicación
-EXPOSE 8081
+EXPOSE 8080
 
 ## Configuración de la JVM optimizada para contenedores
 #ENV JAVA_OPTS=" -Xshareclasses:name=cacheapp,cacheDir=/cache,nonfatal \
