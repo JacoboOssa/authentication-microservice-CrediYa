@@ -13,12 +13,12 @@ spring:
     include: null
 adapters:
   r2dbc:
-    host: ${DB_HOST:localhost}
-    port: ${DB_PORT:5433}
-    database: ${DB_NAME:postgres}
-    schema: ${DB_SCHEMA:public}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:postgres123}
+    host: "${DB_HOST:authdb.cns28oo22mip.us-east-2.rds.amazonaws.com}"
+    port: "${DB_PORT:5432}"
+    database: "${DB_NAME:postgres}"
+    schema: "${DB_SCHEMA:public}"
+    username: "${DB_USER:postgres}"
+    password: "${DB_PASSWORD:mejGeg-4wurfe-dorrez}"
 management:
   endpoints:
     web:
@@ -30,7 +30,6 @@ management:
         enabled: true
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080,http://localhost:8081"
-
 routes:
   paths:
     saveUser: "/api/v1/usuarios"
@@ -39,7 +38,9 @@ routes:
     log-in: "/auth/api/v1/login"
     validate: "/auth/api/v1/validate/{jwt}"
     get-user-by-email: "/api/v1/usuarios/email/{email}"
-
 jwt:
-  secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION}
+  secret: "${JWT_SECRET}"
+  expiration: "${JWT_EXPIRATION}"
+aws:
+  region: "us-east-2"
+  secretName: "auth_secrets"

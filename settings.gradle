@@ -28,3 +28,5 @@ include ':transaction'
 project(':transaction').projectDir = file('./infrastructure/helpers/transaction')
 include ':security'
 project(':security').projectDir = file('./infrastructure/driven-adapters/security')
+include ':metrics'
+project(':metrics').projectDir = file('./infrastructure/helpers/metrics')
